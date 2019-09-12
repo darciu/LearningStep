@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QPushButton, QGridLayout, QGroupBox, QVBoxLayout, QLayout, QStackedLayout, QWidget, QTextEdit,QLineEdit, QLabel,QHBoxLayout
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QPushButton, QGridLayout, QGroupBox,
+                             QVBoxLayout, QLayout, QStackedLayout, QWidget, QTextEdit,QLineEdit, QLabel,QHBoxLayout, QMessageBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
-import sqlite3
-from sqlite3 import Error
+from database_class import Database
 
 
 
@@ -12,20 +12,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.conn = self.create_connection('database.db')
-
         self.set_UI()
 
         self.set_welcome_layout()
 
-    def create_connection(self,db_file):
+        db = Database()
 
-        try:
-            conn = sqlite3.connect(db_file)
-            return conn
-        except Error as e:
-            print(e)
-        return None
 
 
     def set_UI(self):
@@ -38,12 +30,13 @@ class MainWindow(QMainWindow):
 
         self.create_main_layout()
 
+
         self.stacked_layout =QStackedLayout()
         self.stacked_layout.addWidget(self.main_widget)
 
 
 
-        ##############3
+        ##############
 
         self.create_record_task_menu_layout()
         self.stacked_layout.addWidget(self.record_task_widget)
@@ -119,6 +112,11 @@ class MainWindow(QMainWindow):
         self.main_widget = QWidget()
         self.main_widget.setLayout(self.main_grid)
 
+        #### BEHAVIOURS ####
+
+        self.finish_button.clicked.connect(self.finish_button_method)
+        self.next_button.clicked.connect(self.next_button_method)
+
 
     def create_record_task_menu_layout(self):
 
@@ -192,6 +190,72 @@ class MainWindow(QMainWindow):
         optionsMenu.addAction(menuExit)
 
 
+
+    ################################
+
+
+
+
+
+
+
+    #### BEHAVIOUR METHODS ####
+
+
+    def finish_button_method(self):
+
+        #### RECORD TASK ####
+
+        choice = QMessageBox.question(self, "Finish", 'Yes - Finish and save task to the database\nNo - Finish and don\'t save task\nCancel - back to the recording',
+                             QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+
+
+        if choice == QMessageBox.Yes:
+
+            self.set_welcome_layout()
+
+        elif choice == QMessageBox.No:
+
+            self.set_welcome_layout()
+
+        elif choice == QMessageBox.Cancel:
+
+            return
+
+    def next_button_method(self):
+
+        #### RECORD TASK ####
+
+        if self.display_text.text() == "":
+
+            QMessageBox.information(self,'Empty field!','There is empty description field. Please write something to proceed.')
+
+            return
+
+        if self.display_code.toPlainText() == "":
+
+            QMessageBox.information(self, 'Empty field!', 'There is empty code field. Please write something to proceed.')
+
+            return
+
+        choice = QMessageBox.question(self, 'Next step', 'Do you want to proceed to the next step?',
+                                      QMessageBox.Yes | QMessageBox.No)
+
+        if choice == QMessageBox.Yes:
+
+            self.step += 1
+
+            self.display_step.setText("Step\n{0}".format(self.step))
+
+            self.display_text.clear()
+
+            self.display_code.clear()
+
+        else:
+
+            return
+
+
     def menuRecord_method(self):
 
         self.clear_record_menu()
@@ -208,7 +272,7 @@ class MainWindow(QMainWindow):
 
     def start_record_task_method(self):
         if self.record_text_title.text() == "" or self.record_text_field.text() == "":
-            return
+            QMessageBox.information(self,'Warning!','Title and field has to be fulfilled!')
         else:
             self.set_record_layout()
 
@@ -228,12 +292,19 @@ class MainWindow(QMainWindow):
         self.display_title.setText('Title')
         self.display_step.setText('Step\n/')
 
-    def set_record_layout(self):
+        self.finish_button.setDisabled(True)
+        self.next_button.setDisabled(True)
 
+    def set_record_layout(self):
+        self.step = 1
         self.display_text.setEnabled(True)
         self.display_code.setEnabled(True)
         self.display_title.setText(self.record_text_title.text().capitalize())
-        self.display_step.setText('Step\n0')
+        self.display_step.setText('Step\n{0}'.format(self.step))
+        self.display_text.clear()
+        self.display_code.clear()
+        self.finish_button.setEnabled(True)
+        self.next_button.setEnabled(True)
 
 if __name__ == '__main__':
 
