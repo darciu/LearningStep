@@ -79,3 +79,18 @@ class Database:
         rows = cur.fetchall()
 
         return rows
+
+
+    def get_selected_task(self, task_id):
+
+        sql = "SELECT title, description, code FROM tasks WHERE task_id = ?"
+
+        dataset = (int(task_id),)
+
+        cur = self.conn.cursor()
+
+        cur.execute(sql, dataset)
+
+        row = cur.fetchone()
+
+        return row[0], eval(row[1]), eval(row[2])

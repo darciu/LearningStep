@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QPushButton, QG
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from database_class import Database
+import time
 
 
 
@@ -25,6 +26,8 @@ class MainWindow(QMainWindow):
         self.title = ""
 
         self.language = ""
+
+        self.record_or_play = True
 
 
     def set_UI(self):
@@ -203,6 +206,8 @@ class MainWindow(QMainWindow):
 
         self.play_task_cancel_button.clicked.connect(self.cancel_record_task_method)
 
+        self.play_task_button.clicked.connect(self.play_task_method)
+
 
 
     def load_to_play_table(self):
@@ -271,95 +276,153 @@ class MainWindow(QMainWindow):
 
     def finish_button_method(self):
 
-        #### RECORD TASK ####
+        if self.record_or_play:
 
-        if self.step == 1 and self.display_description.text() == "" and self.display_code.toPlainText() == "":
+            #### RECORD TASK ####
 
-            self.set_welcome_layout()
+            if self.step == 1 and self.display_description.text() == "" and self.display_code.toPlainText() == "":
 
-            return
+                self.set_welcome_layout()
 
-        choice = QMessageBox.question(self, "Finish", 'Yes - Finish and save task to the database\nNo - Finish and don\'t save task\nCancel - back to the recording',
-                             QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+                return
 
-
-        if choice == QMessageBox.Yes:
-
-            self.description_dict[self.step] = self.display_description.text()
-
-            self.code_dict[self.step] = self.display_code.toPlainText()
-
-            self.db.add_task(self.description_dict,self.code_dict,self.title,self.language)
-
-            self.set_welcome_layout()
-
-        elif choice == QMessageBox.No:
-
-            self.set_welcome_layout()
-
-        elif choice == QMessageBox.Cancel:
+            choice = QMessageBox.question(self, "Finish", 'Yes - Finish and save task to the database\nNo - Finish and don\'t save task\nCancel - back to the recording',
+                                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
 
 
-            return
+            if choice == QMessageBox.Yes:
+
+                self.description_dict[self.step] = self.display_description.text()
+
+                self.code_dict[self.step] = self.display_code.toPlainText()
+
+                self.db.add_task(self.description_dict,self.code_dict,self.title,self.language)
+
+                self.set_welcome_layout()
+
+            elif choice == QMessageBox.No:
+
+                self.set_welcome_layout()
+
+            elif choice == QMessageBox.Cancel:
+
+                return
+
+        else:
+
+            #### PLAY TASK ####
+
+            choice = QMessageBox.question(self, "Task completed", 'Are you satisfied with the level of task accomplishment?',
+                                          QMessageBox.Yes | QMessageBox.No)
+
+            if choice == QMessageBox.Yes:
+
+
+                self.set_welcome_layout()
+
+
+            elif choice == QMessageBox.No:
+
+                QMessageBox.information(self, 'Task competed','Well... Try next time!')
+
+                self.set_welcome_layout()
+
+
 
     def next_button_method(self):
 
         #### RECORD TASK ####
 
-        # check if fields are not empty
 
-        if self.display_description.text() == "":
+        if self.record_or_play:
 
-            QMessageBox.information(self,'Empty field!','There is empty description field. Please write something to proceed.')
+            # check if fields are not empty
 
-            return
+            if self.display_description.text() == "":
 
-        if self.display_code.toPlainText() == "":
+                QMessageBox.information(self,'Empty field!','There is empty description field. Please write something to proceed.')
 
-            QMessageBox.information(self, 'Empty field!', 'There is empty code field. Please write something to proceed.')
+                return
 
-            return
+            if self.display_code.toPlainText() == "":
 
+                QMessageBox.information(self, 'Empty field!', 'There is empty code field. Please write something to proceed.')
 
-
-        choice = QMessageBox.question(self, 'Next step', 'Do you want to proceed to the next step?',
-                                      QMessageBox.Yes | QMessageBox.No)
-
-        if choice == QMessageBox.Yes:
-
-            # add to dictionaries
-
-            self.description_dict[self.step] = self.display_description.text()
-
-            self.code_dict[self.step] = self.display_code.toPlainText()
+                return
 
 
 
+            choice = QMessageBox.question(self, 'Next step', 'Do you want to proceed to the next step?',
+                                          QMessageBox.Yes | QMessageBox.No)
 
-            self.step += 1
+            if choice == QMessageBox.Yes:
 
-            self.display_step.setText("Step\n{0}".format(self.step))
+                # add to dictionaries
 
-            self.display_description.clear()
+                self.description_dict[self.step] = self.display_description.text()
 
-            self.display_code.clear()
+                self.code_dict[self.step] = self.display_code.toPlainText()
+
+
+
+
+                self.step += 1
+
+                self.display_step.setText("Step\n{0}".format(self.step))
+
+                self.display_description.clear()
+
+                self.display_code.clear()
+
+            else:
+
+                return
 
         else:
+            #### PLAY ####
 
+            self.next_play_layout()
+
+
+    def play_task_method(self):
+
+
+        if self.play_table.selectedIndexes() == []:
             return
+
+        row = self.play_table.selectedIndexes()[0].row()
+
+        self.task_id = self.play_table.item(row,5).text()
+
+
+        self.title, self.description_dict, self.code_dict = self.db.get_selected_task(self.task_id)
+
+        self.step = 1
+
+        self.stacked_layout.setCurrentIndex(0)
+
+        self.set_play_layout()
+
+
 
 
     def menuRecord_method(self):
 
         self.clear_record_menu()
 
+        self.record_or_play = True
+
         self.stacked_layout.setCurrentIndex(1)
+
+
 
     def menuPlay_method(self):
 
         self.play_table.clear()
 
         self.load_to_play_table()
+
+        self.record_or_play = False
 
         self.stacked_layout.setCurrentIndex(2)
 
@@ -399,6 +462,9 @@ class MainWindow(QMainWindow):
 
         self.display_description.setDisabled(True)
         self.display_code.setDisabled(True)
+
+        self.display_description.clear()
+        self.display_code.clear()
         self.display_title.setText('Title')
         self.display_step.setText('Step\n/')
 
@@ -422,6 +488,51 @@ class MainWindow(QMainWindow):
         self.display_code.clear()
         self.finish_button.setEnabled(True)
         self.next_button.setEnabled(True)
+
+    def get_dict_highest_value(self):
+        self.key_list = self.description_dict.keys()
+        return str(max(self.key_list))
+
+
+    def set_play_layout(self):
+
+
+        if self.step == int(self.get_dict_highest_value()):
+
+            self.finish_button.setEnabled(True)
+            self.next_button.setDisabled(True)
+        else:
+            self.finish_button.setDisabled(True)
+            self.next_button.setEnabled(True)
+
+        self.display_description.setReadOnly(True)
+        self.display_code.setReadOnly(True)
+        self.display_description.setEnabled(True)
+        self.display_code.setEnabled(True)
+
+        self.display_description.setText(self.description_dict[self.step])
+        self.display_code.setText(self.code_dict[self.step])
+
+        self.display_title.setText(self.title)
+        self.display_step.setText('Step\n1/{0}'.format(self.get_dict_highest_value()))
+
+    def next_play_layout(self):
+
+        self.step += 1
+
+
+        if self.step == int(self.get_dict_highest_value()):
+
+            self.finish_button.setEnabled(True)
+            self.next_button.setDisabled(True)
+
+
+        self.display_description.setText(self.description_dict[self.step])
+        self.display_code.setText(self.code_dict[self.step])
+        self.display_step.setText('Step\n{0}/{1}'.format(str(self.step),self.get_dict_highest_value()))
+
+
+
 
 if __name__ == '__main__':
 
