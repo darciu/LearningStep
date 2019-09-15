@@ -1,6 +1,6 @@
 import sqlite3
 from sqlite3 import Error
-
+import datetime
 
 
 class Database:
@@ -44,3 +44,38 @@ class Database:
 
         except Error as e:
             print(e)
+
+    def execute_sql(self,sql,dataset):
+
+        cur = self.conn.cursor()
+        cur.execute(sql,dataset)
+        self.conn.commit()
+
+    def add_task(self,description_dict,code_dict,title, language):
+
+        creation_date = datetime.date.today()
+
+        next_pass_date = creation_date + datetime.timedelta(days=1)
+
+        sql = "INSERT INTO tasks(title,language,description,code,creation_date,last_pass_date, next_pass_date,pass_count) VALUES (?,?,?,?,?,?,?,?)"
+
+        dataset = (title,language,str(description_dict),str(code_dict),creation_date,"None",next_pass_date,0)
+
+        self.execute_sql(sql,dataset)
+
+
+    def load_available_tasks(self):
+
+        now_time = datetime.date.today()
+
+        sql = "SELECT title, language, creation_date, last_pass_date, pass_count, task_id FROM tasks WHERE next_pass_date <= ?"
+
+        dataset = (str(now_time),)
+
+        cur = self.conn.cursor()
+
+        cur.execute(sql,dataset)
+
+        rows = cur.fetchall()
+
+        return rows

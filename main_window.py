@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QPushButton, QGridLayout, QGroupBox,
-                             QVBoxLayout, QLayout, QStackedLayout, QWidget, QTextEdit,QLineEdit, QLabel,QHBoxLayout, QMessageBox)
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QPushButton, QGridLayout, QGroupBox, QTableWidget, QTableWidgetItem,
+                             QVBoxLayout, QLayout, QStackedLayout, QWidget, QTextEdit,QLineEdit, QLabel,QHBoxLayout, QMessageBox, QAbstractItemView)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from database_class import Database
@@ -16,8 +16,15 @@ class MainWindow(QMainWindow):
 
         self.set_welcome_layout()
 
-        db = Database()
+        self.db = Database()
 
+        self.description_dict = {}
+
+        self.code_dict = {}
+
+        self.title = ""
+
+        self.language = ""
 
 
     def set_UI(self):
@@ -54,7 +61,7 @@ class MainWindow(QMainWindow):
 
         ### WIDGETS
 
-        self.display_text = QLineEdit()
+        self.display_description = QLineEdit()
         self.display_code = QTextEdit()
         self.display_title = QLabel('Title')
         self.display_step = QLabel('Steps')
@@ -78,7 +85,7 @@ class MainWindow(QMainWindow):
         self.right_grid.addWidget(self.next_button, 2, 0)
 
 
-        self.main_grid.addWidget(self.display_text,0,0)
+        self.main_grid.addWidget(self.display_description,0,0)
         self.main_grid.addWidget(self.display_code,1,0)
         self.main_grid.addWidget(self.display_title,0,1)
         self.main_grid.addItem(self.right_grid,1,1)
@@ -88,8 +95,8 @@ class MainWindow(QMainWindow):
         font = QFont('Arial', 12)
         font.setBold(True)
 
-        self.display_text.setMaximumWidth(600)
-        self.display_text.setAlignment(Qt.AlignHCenter)
+        self.display_description.setMaximumWidth(600)
+        self.display_description.setAlignment(Qt.AlignHCenter)
 
 
         self.display_code.setMaximumWidth(600)
@@ -129,7 +136,7 @@ class MainWindow(QMainWindow):
         self.record_label_2 = QLabel('Provide field of the task:')
 
         self.record_text_title = QLineEdit()
-        self.record_text_field = QLineEdit()
+        self.record_text_language = QLineEdit()
 
         self.record_button_cancel = QPushButton('Cancel')
         self.record_button_start = QPushButton('Start')
@@ -139,7 +146,7 @@ class MainWindow(QMainWindow):
 
         self.record_task_grid.addWidget(self.record_text_title)
         self.record_task_grid.addWidget(self.record_label_2)
-        self.record_task_grid.addWidget(self.record_text_field)
+        self.record_task_grid.addWidget(self.record_text_language)
 
         self.record_task_grid_h.addWidget(self.record_button_cancel)
         self.record_task_grid_h.addWidget(self.record_button_start)
@@ -157,7 +164,66 @@ class MainWindow(QMainWindow):
 
     def create_play_task_menu_layout(self):
 
+
+
+
+
+        #### WIDGETS ####
+
+        self.play_label_1 = QLabel('CHOOSE ONE OF AVAILABLE TASKS:')
+
+        self.play_task_button = QPushButton('Play Selected Task')
+
+        self.play_task_cancel_button = QPushButton('Cancel')
+
+        # Table
+
+        self.play_table = QTableWidget()
+
+
+        #### GRIDS ####
+
+        self.play_task_grid = QVBoxLayout()
+
+        self.play_task_grid.addWidget(self.play_label_1)
+
+        self.play_task_grid.addWidget(self.play_table)
+
+        self.play_task_grid.addWidget(self.play_task_button)
+
+        self.play_task_grid.addWidget(self.play_task_cancel_button)
+
+
+
         self.play_task_widget = QWidget()
+
+        self.play_task_widget.setLayout(self.play_task_grid)
+
+        #### BEHAVIOUR ####
+
+        self.play_task_cancel_button.clicked.connect(self.cancel_record_task_method)
+
+
+
+    def load_to_play_table(self):
+
+        rows = self.db.load_available_tasks()
+        self.play_table.setRowCount(len(rows))
+        self.play_table.setColumnCount(6)
+        self.play_table.setHorizontalHeaderLabels(['Task title (short description)', 'Language', 'Creation Date', 'Last Pass Date', 'Pass Count', 'ID'])
+        self.play_table.verticalHeader().hide()
+        self.play_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.play_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+        for i, row in enumerate(rows):
+
+            self.play_table.setItem(i,0,QTableWidgetItem(row[0]))
+            self.play_table.setItem(i, 1, QTableWidgetItem(row[1]))
+            self.play_table.setItem(i, 2, QTableWidgetItem(row[2]))
+            self.play_table.setItem(i, 3, QTableWidgetItem(row[3]))
+            self.play_table.setItem(i, 4, QTableWidgetItem(str(row[4])))
+            self.play_table.setItem(i, 5, QTableWidgetItem(str(row[5])))
+
 
 
     def set_upper_menu(self):
@@ -175,6 +241,7 @@ class MainWindow(QMainWindow):
 
         menuPlay = QAction('&Play The Task',self)
         menuPlay.setStatusTip('Play one of the tasks from the available...')
+        menuPlay.triggered.connect(self.menuPlay_method)
 
 
         menuAbout = QAction('&About',self)
@@ -206,11 +273,23 @@ class MainWindow(QMainWindow):
 
         #### RECORD TASK ####
 
+        if self.step == 1 and self.display_description.text() == "" and self.display_code.toPlainText() == "":
+
+            self.set_welcome_layout()
+
+            return
+
         choice = QMessageBox.question(self, "Finish", 'Yes - Finish and save task to the database\nNo - Finish and don\'t save task\nCancel - back to the recording',
                              QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
 
 
         if choice == QMessageBox.Yes:
+
+            self.description_dict[self.step] = self.display_description.text()
+
+            self.code_dict[self.step] = self.display_code.toPlainText()
+
+            self.db.add_task(self.description_dict,self.code_dict,self.title,self.language)
 
             self.set_welcome_layout()
 
@@ -220,13 +299,16 @@ class MainWindow(QMainWindow):
 
         elif choice == QMessageBox.Cancel:
 
+
             return
 
     def next_button_method(self):
 
         #### RECORD TASK ####
 
-        if self.display_text.text() == "":
+        # check if fields are not empty
+
+        if self.display_description.text() == "":
 
             QMessageBox.information(self,'Empty field!','There is empty description field. Please write something to proceed.')
 
@@ -238,16 +320,27 @@ class MainWindow(QMainWindow):
 
             return
 
+
+
         choice = QMessageBox.question(self, 'Next step', 'Do you want to proceed to the next step?',
                                       QMessageBox.Yes | QMessageBox.No)
 
         if choice == QMessageBox.Yes:
 
+            # add to dictionaries
+
+            self.description_dict[self.step] = self.display_description.text()
+
+            self.code_dict[self.step] = self.display_code.toPlainText()
+
+
+
+
             self.step += 1
 
             self.display_step.setText("Step\n{0}".format(self.step))
 
-            self.display_text.clear()
+            self.display_description.clear()
 
             self.display_code.clear()
 
@@ -262,6 +355,14 @@ class MainWindow(QMainWindow):
 
         self.stacked_layout.setCurrentIndex(1)
 
+    def menuPlay_method(self):
+
+        self.play_table.clear()
+
+        self.load_to_play_table()
+
+        self.stacked_layout.setCurrentIndex(2)
+
 
     def cancel_record_task_method(self):
 
@@ -271,9 +372,18 @@ class MainWindow(QMainWindow):
 
 
     def start_record_task_method(self):
-        if self.record_text_title.text() == "" or self.record_text_field.text() == "":
+
+        if self.record_text_title.text() == "" or self.record_text_language.text() == "":
+
+
             QMessageBox.information(self,'Warning!','Title and field has to be fulfilled!')
+
         else:
+
+            self.title = self.record_text_title.text()
+
+            self.language = self.record_text_language.text()
+
             self.set_record_layout()
 
             self.stacked_layout.setCurrentIndex(0)
@@ -283,11 +393,11 @@ class MainWindow(QMainWindow):
     def clear_record_menu(self):
 
         self.record_text_title.setText('')
-        self.record_text_field.setText('')
+        self.record_text_language.setText('')
 
     def set_welcome_layout(self):
 
-        self.display_text.setDisabled(True)
+        self.display_description.setDisabled(True)
         self.display_code.setDisabled(True)
         self.display_title.setText('Title')
         self.display_step.setText('Step\n/')
@@ -295,13 +405,20 @@ class MainWindow(QMainWindow):
         self.finish_button.setDisabled(True)
         self.next_button.setDisabled(True)
 
+        self.description_dict = {}
+        self.code_dict = {}
+
+        self.title = ""
+        self.language = ""
+
     def set_record_layout(self):
+
         self.step = 1
-        self.display_text.setEnabled(True)
+        self.display_description.setEnabled(True)
         self.display_code.setEnabled(True)
         self.display_title.setText(self.record_text_title.text().capitalize())
         self.display_step.setText('Step\n{0}'.format(self.step))
-        self.display_text.clear()
+        self.display_description.clear()
         self.display_code.clear()
         self.finish_button.setEnabled(True)
         self.next_button.setEnabled(True)
