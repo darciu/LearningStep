@@ -1,9 +1,11 @@
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QPushButton, QGridLayout, QGroupBox, QTableWidget, QTableWidgetItem,
                              QVBoxLayout, QLayout, QStackedLayout, QWidget, QTextEdit,QLineEdit, QLabel,QHBoxLayout, QMessageBox, QAbstractItemView)
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont
 from database_class import Database
 import time
+from functools import partial
+import sys
 
 
 
@@ -55,6 +57,12 @@ class MainWindow(QMainWindow):
 
         self.create_play_task_menu_layout()
         self.stacked_layout.addWidget(self.play_task_widget)
+
+        ########
+
+        self.create_delete_task_menu_layout()
+        self.stacked_layout.addWidget(self.delete_task_widget)
+
 
         self.central_widget = QWidget()
         self.central_widget.setLayout(self.stacked_layout)
@@ -167,10 +175,6 @@ class MainWindow(QMainWindow):
 
     def create_play_task_menu_layout(self):
 
-
-
-
-
         #### WIDGETS ####
 
         self.play_label_1 = QLabel('CHOOSE ONE OF AVAILABLE TASKS:')
@@ -208,6 +212,92 @@ class MainWindow(QMainWindow):
 
         self.play_task_button.clicked.connect(self.play_task_method)
 
+    def create_delete_task_menu_layout(self):
+
+
+        #### WIDGETS ####
+
+
+        self.delete_task_label = QLabel('Provide number of the task to delete:')
+
+        self.delete_task_text_box = QLineEdit()
+
+        self.delete_task_delete_button = QPushButton('DELETE')
+
+        self.delete_task_cancel_button = QPushButton('Cancel')
+
+
+        #### GRIDS ####
+
+        self.delete_task_grid = QVBoxLayout()
+
+        self.delete_task_grid_h = QHBoxLayout()
+
+
+        self.delete_task_grid_h.addWidget(self.delete_task_cancel_button)
+
+        self.delete_task_grid_h.addWidget(self.delete_task_delete_button)
+
+
+        self.delete_task_grid.addWidget(self.delete_task_label)
+
+        self.delete_task_grid.addWidget(self.delete_task_text_box)
+
+        self.delete_task_grid.addItem(self.delete_task_grid_h)
+
+
+        self.delete_task_widget = QWidget()
+
+        self.delete_task_widget.setLayout(self.delete_task_grid)
+
+        #### BEHAVIOUR ####
+
+        self.delete_task_cancel_button.clicked.connect(self.cancel_record_task_method)
+
+        self.delete_task_delete_button.clicked.connect(self.delete_task)
+
+
+
+    def delete_task(self):
+
+        task_id = int(self.delete_task_text_box.text())
+
+        if self.delete_task_text_box.text() == "":
+
+            QMessageBox.information(self, 'Empty text box', 'In order to delete task, please provide a valid task ID!')
+
+            return
+
+        if not self.delete_task_text_box.text().isnumeric():
+
+            QMessageBox.information(self, 'Invalid input', 'In order to delete task, please provide numeric value that corresponds to task ID!')
+
+            return
+
+        if not self.db.check_if_task_id_exists(task_id):
+
+            QMessageBox.information(self, 'No such task ID', 'There is no task ID in database: {0}'.format(task_id))
+
+            return
+
+        choice = QMessageBox.question(self, "Delete task", 'Are you sure to delete task with given ID: {0}'.format(task_id),
+                                      QMessageBox.Yes | QMessageBox.No)
+
+
+        if choice == QMessageBox.Yes:
+
+            self.db.delete_task(task_id)
+
+            QMessageBox.information(self, 'Task deleted', 'Task with ID {0} has been successfully deleted from database!'.format(task_id))
+
+
+            self.stacked_layout.setCurrentIndex(0)
+
+            self.set_welcome_layout()
+
+        elif choice == QMessageBox.No:
+
+            return
 
 
     def load_to_play_table(self):
@@ -249,15 +339,23 @@ class MainWindow(QMainWindow):
         menuPlay.triggered.connect(self.menuPlay_method)
 
 
+        menuDelete = QAction('&Delete task',self)
+        menuDelete.setStatusTip('Delete one task for given task ID...')
+        menuDelete.triggered.connect(self.menuDelete_method)
+
+
         menuAbout = QAction('&About',self)
         menuAbout.setStatusTip('About the LearningStep app...')
+        menuAbout.triggered.connect(self.menuAbout_method)
 
         menuExit = QAction("&Exit", self)
         menuExit.setStatusTip('Exit the application...')
+        menuExit.triggered.connect(self.menuExit_method)
 
 
         optionsMenu.addAction(menuRecord)
         optionsMenu.addAction(menuPlay)
+        optionsMenu.addAction(menuDelete)
         optionsMenu.addAction(menuAbout)
         optionsMenu.addAction(menuExit)
 
@@ -265,13 +363,6 @@ class MainWindow(QMainWindow):
 
     ################################
 
-
-
-
-
-
-
-    #### BEHAVIOUR METHODS ####
 
 
     def finish_button_method(self):
@@ -292,9 +383,15 @@ class MainWindow(QMainWindow):
 
             if choice == QMessageBox.Yes:
 
-                self.description_dict[self.step] = self.display_description.text()
+                if self.display_description.text() == "" or self.display_code.toPlainText() == "":
 
-                self.code_dict[self.step] = self.display_code.toPlainText()
+                    pass
+
+                else:
+
+                    self.description_dict[self.step] = self.display_description.text()
+
+                    self.code_dict[self.step] = self.display_code.toPlainText()
 
                 self.db.add_task(self.description_dict,self.code_dict,self.title,self.language)
 
@@ -317,13 +414,18 @@ class MainWindow(QMainWindow):
 
             if choice == QMessageBox.Yes:
 
+                next_pass_date = self.db.update_task(self.task_id, self.pass_count)
+
+                QMessageBox.information(self, 'Task accomplished', 'Task has been accomplished. Expect it on the list on {0}'.format(next_pass_date))
 
                 self.set_welcome_layout()
 
 
+
+
             elif choice == QMessageBox.No:
 
-                QMessageBox.information(self, 'Task competed','Well... Try next time!')
+                QMessageBox.information(self, 'Task unaccomplished','Well... Try next time!')
 
                 self.set_welcome_layout()
 
@@ -395,7 +497,7 @@ class MainWindow(QMainWindow):
         self.task_id = self.play_table.item(row,5).text()
 
 
-        self.title, self.description_dict, self.code_dict = self.db.get_selected_task(self.task_id)
+        self.title, self.description_dict, self.code_dict, self.pass_count = self.db.get_selected_task(self.task_id)
 
         self.step = 1
 
@@ -425,6 +527,22 @@ class MainWindow(QMainWindow):
         self.record_or_play = False
 
         self.stacked_layout.setCurrentIndex(2)
+
+
+    def menuDelete_method(self):
+
+        self.delete_task_text_box.clear()
+
+        self.stacked_layout.setCurrentIndex(3)
+
+
+    def menuAbout_method(self):
+        pass
+
+
+    def menuExit_method(self):
+
+        sys.exit()
 
 
     def cancel_record_task_method(self):
@@ -521,10 +639,15 @@ class MainWindow(QMainWindow):
         self.step += 1
 
 
+
         if self.step == int(self.get_dict_highest_value()):
 
             self.finish_button.setEnabled(True)
             self.next_button.setDisabled(True)
+
+        else:
+            self.next_button.setEnabled(False)
+            QTimer.singleShot(3000, partial(self.next_button.setEnabled, True));
 
 
         self.display_description.setText(self.description_dict[self.step])
