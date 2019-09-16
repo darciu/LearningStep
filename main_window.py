@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QPushButton, QGridLayout, QGroupBox, QTableWidget, QTableWidgetItem,
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QPushButton, QGridLayout, QGroupBox, QTableWidget, QTableWidgetItem, QComboBox,
                              QVBoxLayout, QLayout, QStackedLayout, QWidget, QTextEdit,QLineEdit, QLabel,QHBoxLayout, QMessageBox, QAbstractItemView)
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont
@@ -31,6 +31,17 @@ class MainWindow(QMainWindow):
 
         self.record_or_play = True
 
+        self.about_dict = {1:'This application is named LearningStep. The purpose is to learn self made lessons in intervals of time.',
+                           2:'Record New Task - construct your own lesson in steps.\nProvide title as short description, choose language (field of interests) and by clicking next move forward lessons.'
+                             '\nOne step consists of description (upper text field) and code (lower text field).\nTo proceed, click Next button.\nWhen all steps are written, click Finish button to save the lesson.',
+                           3:'Play The Task - play previously recorded task (choose from the table of available tasks).\nGo through all tasks by clicking Next button.\nAt first you see description and then code field.\n'
+                             'When you will walk through all steps you can decide whether this approach was satisfying. Only if so, task will be completed,\n updated to database '
+                             'and reminded after certain interval of time.',
+                           4:'Delete Task - deletes task according to provided task ID.',
+                           5:'Time intervals are: 1 day, 3 days, 7 days, 10 days, 14 days, 28 days, 60 days, 90 days, 180 days...',
+                           6:'Credits: Dariusz Giemza, 2019',
+                           7:''}
+
 
     def set_UI(self):
 
@@ -58,11 +69,17 @@ class MainWindow(QMainWindow):
         self.create_play_task_menu_layout()
         self.stacked_layout.addWidget(self.play_task_widget)
 
+
+
         ########
 
         self.create_delete_task_menu_layout()
         self.stacked_layout.addWidget(self.delete_task_widget)
 
+        ########
+
+        self.create_about_menu_layout()
+        self.stacked_layout.addWidget(self.about_widget)
 
         self.central_widget = QWidget()
         self.central_widget.setLayout(self.stacked_layout)
@@ -138,26 +155,34 @@ class MainWindow(QMainWindow):
 
     def create_record_task_menu_layout(self):
 
-
-
         self.record_task_grid = QVBoxLayout()
         self.record_task_grid_h = QHBoxLayout()
 
         self.record_label_1 = QLabel('Provide the title of the task:')
-        self.record_label_2 = QLabel('Provide field of the task:')
+        self.record_label_2 = QLabel('Provide language (field) of the task:')
 
         self.record_text_title = QLineEdit()
         self.record_text_language = QLineEdit()
+
+
+
+        self.record_combo_box = QComboBox()
+        self.record_combo_box.addItem("---")
+        self.record_combo_box.addItem("Python")
+        self.record_combo_box.addItem("R")
+        self.record_combo_box.addItem("Machine Learning")
+        self.record_combo_box.addItem("Deep Learning")
+        self.record_combo_box.addItem("English")
+
 
         self.record_button_cancel = QPushButton('Cancel')
         self.record_button_start = QPushButton('Start')
 
 
-
-
+        self.record_task_grid.addWidget(self.record_label_1)
         self.record_task_grid.addWidget(self.record_text_title)
         self.record_task_grid.addWidget(self.record_label_2)
-        self.record_task_grid.addWidget(self.record_text_language)
+        self.record_task_grid.addWidget(self.record_combo_box)
 
         self.record_task_grid_h.addWidget(self.record_button_cancel)
         self.record_task_grid_h.addWidget(self.record_button_start)
@@ -256,7 +281,50 @@ class MainWindow(QMainWindow):
 
         self.delete_task_delete_button.clicked.connect(self.delete_task)
 
+    def create_about_menu_layout(self):
 
+        self.about_label = QLabel('Sample')
+
+        self.about_next_button = QPushButton('Next')
+
+        self.about_cancel_button = QPushButton('Cancel')
+
+
+        #### GRID ####
+
+        self.about_grid_H = QHBoxLayout()
+
+        self.about_grid_H.addWidget(self.about_cancel_button)
+
+        self.about_grid_H.addWidget(self.about_next_button)
+
+        self.about_grid_V = QVBoxLayout()
+
+        self.about_grid_V.addWidget(self.about_label)
+
+        self.about_grid_V.addItem(self.about_grid_H)
+
+        self.about_widget = QWidget()
+
+        self.about_widget.setLayout(self.about_grid_V)
+
+
+        #### BEHAVIOUR ####
+
+        self.about_cancel_button.clicked.connect(self.cancel_record_task_method)
+
+        self.about_next_button.clicked.connect(self.about_next_method)
+
+
+    def about_next_method(self):
+
+
+        if self.about_step < 7:
+            self.about_step +=1
+        else:
+            self.about_step = 1
+
+        self.about_label.setText(self.about_dict[self.about_step])
 
     def delete_task(self):
 
@@ -483,13 +551,22 @@ class MainWindow(QMainWindow):
         else:
             #### PLAY ####
 
-            self.next_play_layout()
+            print(self.description_or_code)
+
+            if self.description_or_code:
+
+                self.display_code_play_layout()
+
+            else:
+
+                self.next_step_play_layout()
 
 
     def play_task_method(self):
 
 
         if self.play_table.selectedIndexes() == []:
+
             return
 
         row = self.play_table.selectedIndexes()[0].row()
@@ -537,7 +614,12 @@ class MainWindow(QMainWindow):
 
 
     def menuAbout_method(self):
-        pass
+
+        self.about_step = 1
+
+        self.about_label.setText(self.about_dict[self.about_step])
+
+        self.stacked_layout.setCurrentIndex(4)
 
 
     def menuExit_method(self):
@@ -554,7 +636,9 @@ class MainWindow(QMainWindow):
 
     def start_record_task_method(self):
 
-        if self.record_text_title.text() == "" or self.record_text_language.text() == "":
+
+
+        if self.record_text_title.text() == "" or self.record_combo_box.currentText() == "---":
 
 
             QMessageBox.information(self,'Warning!','Title and field has to be fulfilled!')
@@ -563,7 +647,7 @@ class MainWindow(QMainWindow):
 
             self.title = self.record_text_title.text()
 
-            self.language = self.record_text_language.text()
+            self.language = self.record_combo_box.currentText()
 
             self.set_record_layout()
 
@@ -574,7 +658,7 @@ class MainWindow(QMainWindow):
     def clear_record_menu(self):
 
         self.record_text_title.setText('')
-        self.record_text_language.setText('')
+        self.record_combo_box.setCurrentIndex(0)
 
     def set_welcome_layout(self):
 
@@ -615,30 +699,29 @@ class MainWindow(QMainWindow):
     def set_play_layout(self):
 
 
-        if self.step == int(self.get_dict_highest_value()):
 
-            self.finish_button.setEnabled(True)
-            self.next_button.setDisabled(True)
-        else:
-            self.finish_button.setDisabled(True)
-            self.next_button.setEnabled(True)
+        self.finish_button.setDisabled(True)
+        self.next_button.setEnabled(False)
+        QTimer.singleShot(3000, partial(self.next_button.setEnabled, True))
 
         self.display_description.setReadOnly(True)
         self.display_code.setReadOnly(True)
         self.display_description.setEnabled(True)
         self.display_code.setEnabled(True)
-
-        self.display_description.setText(self.description_dict[self.step])
-        self.display_code.setText(self.code_dict[self.step])
-
         self.display_title.setText(self.title)
         self.display_step.setText('Step\n1/{0}'.format(self.get_dict_highest_value()))
+        self.display_description.setText(self.description_dict[self.step])
 
-    def next_play_layout(self):
-
-        self.step += 1
+        self.description_or_code = True
 
 
+
+    def display_code_play_layout(self):
+
+
+        self.description_or_code = False
+
+        self.display_code.setText(self.code_dict[self.step])
 
         if self.step == int(self.get_dict_highest_value()):
 
@@ -647,15 +730,21 @@ class MainWindow(QMainWindow):
 
         else:
             self.next_button.setEnabled(False)
-            QTimer.singleShot(3000, partial(self.next_button.setEnabled, True));
+            QTimer.singleShot(3000, partial(self.next_button.setEnabled, True))
 
 
+
+    def next_step_play_layout(self):
+
+        self.step += 1
+        self.description_or_code = True
+
+        self.next_button.setEnabled(False)
+        QTimer.singleShot(3000, partial(self.next_button.setEnabled, True))
+
+        self.display_code.clear()
         self.display_description.setText(self.description_dict[self.step])
-        self.display_code.setText(self.code_dict[self.step])
         self.display_step.setText('Step\n{0}/{1}'.format(str(self.step),self.get_dict_highest_value()))
-
-
-
 
 if __name__ == '__main__':
 

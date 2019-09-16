@@ -132,15 +132,9 @@ class Database:
 
             next_pass_date = last_pass_date + datetime.timedelta(days= 90)
 
-
-        elif pass_count == 8:
-
-            next_pass_date = last_pass_date + datetime.timedelta(days= 180)
-
-
         else:
 
-            next_pass_date = last_pass_date + datetime.timedelta(days= 360)
+            next_pass_date = last_pass_date + datetime.timedelta(days= 180)
 
 
         pass_count += 1
