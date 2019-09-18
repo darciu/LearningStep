@@ -4,6 +4,7 @@ import datetime
 
 
 class Database:
+    """Class responsible for database connection"""
 
     def __init__(self):
 
@@ -37,6 +38,7 @@ class Database:
 
 
     def create_table(self,conn,sql_statement):
+        """Create table"""
         try:
             cur = conn.cursor()
             cur.execute(sql_statement)
@@ -46,12 +48,14 @@ class Database:
             print(e)
 
     def execute_sql(self,sql,dataset):
+        """Executing given sql statement with dataset"""
 
         cur = self.conn.cursor()
         cur.execute(sql,dataset)
         self.conn.commit()
 
     def add_task(self,description_dict,code_dict,title, language):
+        """Add new task to database"""
 
         creation_date = datetime.date.today()
 
@@ -65,6 +69,7 @@ class Database:
 
 
     def load_available_tasks(self):
+        """Returns available tasks"""
 
         now_time = datetime.date.today()
 
@@ -82,6 +87,7 @@ class Database:
 
 
     def get_selected_task(self, task_id):
+        """Returns selected (in table) task"""
 
         sql = "SELECT title, description, code, pass_count FROM tasks WHERE task_id = ?"
 
@@ -97,7 +103,7 @@ class Database:
 
 
     def update_task(self, task_id, pass_count):
-
+        """If task is passed then updates"""
         last_pass_date = datetime.date.today()
 
         if pass_count == 0:
@@ -149,6 +155,7 @@ class Database:
         return str(next_pass_date)
 
     def check_if_task_id_exists(self, task_id):
+        """Returns True or False if given task id exists in database"""
 
         sql = "SELECT task_id FROM tasks WHERE task_id = ?"
 
@@ -169,7 +176,7 @@ class Database:
 
 
     def delete_task(self, task_id):
-
+        """Delete task"""
         sql = "DELETE FROM tasks WHERE task_id = ?"
 
         dataset = (task_id,)

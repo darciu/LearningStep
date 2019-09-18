@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QPushButton, QGridLayout, QGroupBox, QTableWidget, QTableWidgetItem, QComboBox,
-                             QVBoxLayout, QLayout, QStackedLayout, QWidget, QTextEdit,QLineEdit, QLabel,QHBoxLayout, QMessageBox, QAbstractItemView)
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QPushButton, QGroupBox, QTableWidget, QTableWidgetItem, QComboBox, QGridLayout,
+                             QVBoxLayout, QStackedLayout, QWidget, QTextEdit, QLineEdit, QLabel, QHBoxLayout, QMessageBox, QAbstractItemView)
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont
 from database_class import Database
@@ -11,6 +11,7 @@ import sys
 
 
 class MainWindow(QMainWindow):
+    """Main application window"""
 
     def __init__(self):
         super().__init__()
@@ -48,7 +49,7 @@ class MainWindow(QMainWindow):
 
 
     def set_UI(self):
-
+        """Set main window properties and create stacked layouts"""
         self.setWindowTitle("LearningStep")
 
         self.setGeometry(230,100,900,500)
@@ -60,8 +61,6 @@ class MainWindow(QMainWindow):
 
         self.stacked_layout =QStackedLayout()
         self.stacked_layout.addWidget(self.main_widget)
-
-
 
         ##############
 
@@ -90,7 +89,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
 
     def create_main_layout(self):
-
+        """Create startin layouy"""
         ### WIDGETS
 
         self.display_description = QLineEdit()
@@ -105,10 +104,6 @@ class MainWindow(QMainWindow):
 
         self.main_grid = QGridLayout()
         self.right_grid = QGridLayout()
-
-
-
-
 
         ### ADD WIDGETS
 
@@ -136,8 +131,6 @@ class MainWindow(QMainWindow):
         self.display_code.setMaximumHeight(500)
 
 
-
-
         self.display_title.setFont(font)
         self.display_title.setAlignment(Qt.AlignHCenter)
 
@@ -158,8 +151,10 @@ class MainWindow(QMainWindow):
 
 
     def create_record_task_menu_layout(self):
+        """Create layout for recording new taks"""
 
         self.record_task_grid = QVBoxLayout()
+
         self.record_task_grid_h = QHBoxLayout()
 
         self.record_label_1 = QLabel('TITLE OF THE TASK:')
@@ -169,9 +164,6 @@ class MainWindow(QMainWindow):
 
         self.record_text_title = QLineEdit()
         self.record_text_title.setAlignment(Qt.AlignHCenter)
-
-
-
 
         self.record_combo_box = QComboBox()
         self.record_combo_box.addItem("---")
@@ -222,12 +214,12 @@ class MainWindow(QMainWindow):
 
         #### BEHAVIOUR ####
 
-        self.record_button_cancel.clicked.connect(self.cancel_record_task_method)
+        self.record_button_cancel.clicked.connect(self.cancel_task_method)
 
         self.record_button_start.clicked.connect(self.start_record_task_method)
 
     def create_play_task_menu_layout(self):
-
+        """Create play task layout"""
         #### WIDGETS ####
 
         self.play_label_1 = QLabel('CHOOSE ONE OF AVAILABLE TASKS:')
@@ -273,12 +265,12 @@ class MainWindow(QMainWindow):
 
         #### BEHAVIOUR ####
 
-        self.play_task_cancel_button.clicked.connect(self.cancel_record_task_method)
+        self.play_task_cancel_button.clicked.connect(self.cancel_task_method)
 
         self.play_task_button.clicked.connect(self.play_task_method)
 
     def create_delete_task_menu_layout(self):
-
+        """Create delete layout"""
 
         #### WIDGETS ####
 
@@ -332,11 +324,12 @@ class MainWindow(QMainWindow):
 
         #### BEHAVIOUR ####
 
-        self.delete_task_cancel_button.clicked.connect(self.cancel_record_task_method)
+        self.delete_task_cancel_button.clicked.connect(self.cancel_task_method)
 
         self.delete_task_delete_button.clicked.connect(self.delete_task)
 
     def create_about_menu_layout(self):
+        """Create about layout"""
 
         self.about_label = QLabel('Sample')
 
@@ -369,15 +362,57 @@ class MainWindow(QMainWindow):
         self.about_label.setAlignment(Qt.AlignHCenter)
 
 
+        self.about_cancel_button.setMinimumHeight(40)
+
+        self.about_next_button.setMinimumHeight(40)
+
+
         #### BEHAVIOUR ####
 
-        self.about_cancel_button.clicked.connect(self.cancel_record_task_method)
+        self.about_cancel_button.clicked.connect(self.cancel_task_method)
 
         self.about_next_button.clicked.connect(self.about_next_method)
 
+    def set_upper_menu(self):
+        """Create rolling  Menu"""
+
+        self.statusBar()
+
+        mainMenu = self.menuBar()
+
+        optionsMenu = mainMenu.addMenu('&Menu')
+
+        menuRecord = QAction('&Record New Task',self)
+        menuRecord.setStatusTip('Record New Task and save it into database...')
+        menuRecord.triggered.connect(self.menuRecord_method)
+
+        menuPlay = QAction('&Play The Task',self)
+        menuPlay.setStatusTip('Play one of the tasks from the available...')
+        menuPlay.triggered.connect(self.menuPlay_method)
+
+
+        menuDelete = QAction('&Delete task',self)
+        menuDelete.setStatusTip('Delete one task for given task ID...')
+        menuDelete.triggered.connect(self.menuDelete_method)
+
+
+        menuAbout = QAction('&About',self)
+        menuAbout.setStatusTip('About the LearningStep app...')
+        menuAbout.triggered.connect(self.menuAbout_method)
+
+        menuExit = QAction("&Exit", self)
+        menuExit.setStatusTip('Exit the application...')
+        menuExit.triggered.connect(self.menuExit_method)
+
+
+        optionsMenu.addAction(menuRecord)
+        optionsMenu.addAction(menuPlay)
+        optionsMenu.addAction(menuDelete)
+        optionsMenu.addAction(menuAbout)
+        optionsMenu.addAction(menuExit)
 
     def about_next_method(self):
-
+        """About layout, Next button"""
 
         if self.about_step < 7:
             self.about_step +=1
@@ -387,6 +422,7 @@ class MainWindow(QMainWindow):
         self.about_label.setText(self.about_dict[self.about_step])
 
     def delete_task(self):
+        """Delete layout, Delete button"""
 
         try:
             task_id = int(self.delete_task_text_box.text())
@@ -434,17 +470,28 @@ class MainWindow(QMainWindow):
 
 
     def load_to_play_table(self):
+        """Load table with available tasks"""
 
         rows = self.db.load_available_tasks()
+
         self.play_table.setRowCount(len(rows))
+
         self.play_table.setColumnCount(6)
+
         self.play_table.setHorizontalHeaderLabels(['Task title (short description)', 'Language', 'Creation Date', 'Last Pass Date', 'Pass Count', 'ID'])
+
         self.play_table.verticalHeader().hide()
+
         self.play_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
         self.play_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+
         self.play_table.setColumnWidth(0, 280)
+
         self.play_table.setColumnWidth(1, 180)
+
         self.play_table.setColumnWidth(2, 110)
+
         self.play_table.setColumnWidth(3, 110)
 
 
@@ -475,52 +522,8 @@ class MainWindow(QMainWindow):
             self.play_table.setItem(i, 5, item)
 
 
-
-    def set_upper_menu(self):
-
-
-        self.statusBar()
-
-        mainMenu = self.menuBar()
-
-        optionsMenu = mainMenu.addMenu('&Menu')
-
-        menuRecord = QAction('&Record New Task',self)
-        menuRecord.setStatusTip('Record New Task and save it into database...')
-        menuRecord.triggered.connect(self.menuRecord_method)
-
-        menuPlay = QAction('&Play The Task',self)
-        menuPlay.setStatusTip('Play one of the tasks from the available...')
-        menuPlay.triggered.connect(self.menuPlay_method)
-
-
-        menuDelete = QAction('&Delete task',self)
-        menuDelete.setStatusTip('Delete one task for given task ID...')
-        menuDelete.triggered.connect(self.menuDelete_method)
-
-
-        menuAbout = QAction('&About',self)
-        menuAbout.setStatusTip('About the LearningStep app...')
-        menuAbout.triggered.connect(self.menuAbout_method)
-
-        menuExit = QAction("&Exit", self)
-        menuExit.setStatusTip('Exit the application...')
-        menuExit.triggered.connect(self.menuExit_method)
-
-
-        optionsMenu.addAction(menuRecord)
-        optionsMenu.addAction(menuPlay)
-        optionsMenu.addAction(menuDelete)
-        optionsMenu.addAction(menuAbout)
-        optionsMenu.addAction(menuExit)
-
-
-
-    ################################
-
-
-
     def finish_button_method(self):
+        """Finish record and play button"""
 
         if self.record_or_play:
 
@@ -587,9 +590,9 @@ class MainWindow(QMainWindow):
 
 
     def next_button_method(self):
+        """Next record and play button"""
 
         #### RECORD TASK ####
-
 
         if self.record_or_play:
 
@@ -607,8 +610,6 @@ class MainWindow(QMainWindow):
 
                 return
 
-
-
             choice = QMessageBox.question(self, 'Next step', 'Do you want to proceed to the next step?',
                                           QMessageBox.Yes | QMessageBox.No)
 
@@ -619,9 +620,6 @@ class MainWindow(QMainWindow):
                 self.description_dict[self.step] = self.display_description.text()
 
                 self.code_dict[self.step] = self.display_code.toPlainText()
-
-
-
 
                 self.step += 1
 
@@ -650,7 +648,7 @@ class MainWindow(QMainWindow):
 
 
     def play_task_method(self):
-
+        """Play task starting method"""
 
         if self.play_table.selectedIndexes() == []:
 
@@ -670,51 +668,8 @@ class MainWindow(QMainWindow):
         self.set_play_layout()
 
 
-
-
-    def menuRecord_method(self):
-
-        self.clear_record_menu()
-
-        self.record_or_play = True
-
-        self.stacked_layout.setCurrentIndex(1)
-
-
-
-    def menuPlay_method(self):
-
-        self.play_table.clear()
-
-        self.load_to_play_table()
-
-        self.record_or_play = False
-
-        self.stacked_layout.setCurrentIndex(2)
-
-
-    def menuDelete_method(self):
-
-        self.delete_task_text_box.clear()
-
-        self.stacked_layout.setCurrentIndex(3)
-
-
-    def menuAbout_method(self):
-
-        self.about_step = 1
-
-        self.about_label.setText(self.about_dict[self.about_step])
-
-        self.stacked_layout.setCurrentIndex(4)
-
-
-    def menuExit_method(self):
-
-        sys.exit()
-
-
-    def cancel_record_task_method(self):
+    def cancel_task_method(self):
+        """Cancel button method"""
 
         self.clear_record_menu()
 
@@ -722,11 +677,9 @@ class MainWindow(QMainWindow):
 
 
     def start_record_task_method(self):
-
-
+        """Start recording method"""
 
         if self.record_text_title.text() == "" or self.record_combo_box.currentText() == "---":
-
 
             QMessageBox.information(self,'Warning!','Title and field has to be fulfilled!')
 
@@ -743,51 +696,71 @@ class MainWindow(QMainWindow):
 
 
     def clear_record_menu(self):
-
+        """Clear Record menu"""
         self.record_text_title.setText('')
+
         self.record_combo_box.setCurrentIndex(0)
 
     def set_welcome_layout(self):
-
+        """Set startin layout"""
         self.display_description.setDisabled(True)
+
         self.display_code.setDisabled(True)
 
         self.display_description.clear()
+
         self.display_code.clear()
+
         self.display_title.setText('Title')
+
         self.display_step.setText('Step\n/')
 
         self.finish_button.setDisabled(True)
+
         self.next_button.setDisabled(True)
 
         self.description_dict = {}
+
         self.code_dict = {}
 
         self.title = ""
+
         self.language = ""
 
     def set_record_layout(self):
+        """Set layout while Record"""
 
         self.step = 1
+
         self.display_description.setReadOnly(False)
+
         self.display_code.setReadOnly(False)
+
         self.display_description.setEnabled(True)
+
         self.display_code.setEnabled(True)
+
         self.display_title.setText(self.record_text_title.text().capitalize())
+
         self.display_step.setText('Step\n{0}'.format(self.step))
+
         self.display_description.clear()
+
         self.display_code.clear()
+
         self.finish_button.setEnabled(True)
+
         self.next_button.setEnabled(True)
 
     def get_dict_highest_value(self):
+        """Get highest value of step from dictionary"""
+
         self.key_list = self.description_dict.keys()
         return str(max(self.key_list))
 
 
     def set_play_layout(self):
-
-
+        """Set layout while play"""
 
         self.finish_button.setDisabled(True)
         self.next_button.setEnabled(False)
@@ -806,8 +779,7 @@ class MainWindow(QMainWindow):
 
 
     def display_code_play_layout(self):
-
-
+        """Displays code while Play"""
         self.description_or_code = False
 
         self.display_code.setText(self.code_dict[self.step])
@@ -824,7 +796,7 @@ class MainWindow(QMainWindow):
 
 
     def next_step_play_layout(self):
-
+        """Click Next during Play"""
         self.step += 1
         self.description_or_code = True
 
@@ -834,6 +806,50 @@ class MainWindow(QMainWindow):
         self.display_code.clear()
         self.display_description.setText(self.description_dict[self.step])
         self.display_step.setText('Step\n{0}/{1}'.format(str(self.step),self.get_dict_highest_value()))
+
+
+
+    def menuRecord_method(self):
+        """Upper Menu option"""
+        self.clear_record_menu()
+
+        self.record_or_play = True
+
+        self.stacked_layout.setCurrentIndex(1)
+
+
+
+    def menuPlay_method(self):
+        """Upper Menu option"""
+        self.play_table.clear()
+
+        self.load_to_play_table()
+
+        self.record_or_play = False
+
+        self.stacked_layout.setCurrentIndex(2)
+
+
+    def menuDelete_method(self):
+        """Upper Menu option"""
+        self.delete_task_text_box.clear()
+
+        self.stacked_layout.setCurrentIndex(3)
+
+
+    def menuAbout_method(self):
+        """Upper Menu option"""
+        self.about_step = 1
+
+        self.about_label.setText(self.about_dict[self.about_step])
+
+        self.stacked_layout.setCurrentIndex(4)
+
+
+    def menuExit_method(self):
+        """Upper Menu option"""
+        sys.exit()
+
 
 if __name__ == '__main__':
 
