@@ -15,6 +15,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.universal_font = QFont('Calibri', 13)
+
         self.set_UI()
 
         self.set_welcome_layout()
@@ -31,16 +33,18 @@ class MainWindow(QMainWindow):
 
         self.record_or_play = True
 
-        self.about_dict = {1:'This application is named LearningStep. The purpose is to learn self made lessons in intervals of time.',
-                           2:'Record New Task - construct your own lesson in steps.\nProvide title as short description, choose language (field of interests) and by clicking next move forward lessons.'
+        self.about_dict = {1:'LearningStep\n\nThis application is named LearningStep. The purpose is to learn self made text-lessons in intervals of time.',
+                           2:'Record New Task\n\nConstruct your own lesson in steps.\nProvide title as short description, choose language (field of interests) and by clicking next move forward lessons.'
                              '\nOne step consists of description (upper text field) and code (lower text field).\nTo proceed, click Next button.\nWhen all steps are written, click Finish button to save the lesson.',
-                           3:'Play The Task - play previously recorded task (choose from the table of available tasks).\nGo through all tasks by clicking Next button.\nAt first you see description and then code field.\n'
+                           3:'Play The Task\n\nPlay previously recorded task (choose from the table of available tasks).\nGo through all tasks by clicking Next button.\nAt first you see description and then code field.\n'
                              'When you will walk through all steps you can decide whether this approach was satisfying. Only if so, task will be completed,\n updated to database '
                              'and reminded after certain interval of time.',
-                           4:'Delete Task - deletes task according to provided task ID.',
-                           5:'Time intervals are: 1 day, 3 days, 7 days, 10 days, 14 days, 28 days, 60 days, 90 days, 180 days...',
-                           6:'Credits: Dariusz Giemza, 2019',
+                           4:'Delete Task\n\nDelete task according to provided task ID.',
+                           5:'Time intervals are:\n\n1 day, 3 days, 7 days, 10 days, 14 days, 28 days, 60 days, 90 days, 180 days...',
+                           6:'Credits:\n\nDariusz Giemza, 2019',
                            7:''}
+
+
 
 
     def set_UI(self):
@@ -120,7 +124,7 @@ class MainWindow(QMainWindow):
 
 
         ### LAYOUT FORMATION
-        font = QFont('Arial', 12)
+        font = QFont('Calibri', 15)
         font.setBold(True)
 
         self.display_description.setMaximumWidth(600)
@@ -158,11 +162,14 @@ class MainWindow(QMainWindow):
         self.record_task_grid = QVBoxLayout()
         self.record_task_grid_h = QHBoxLayout()
 
-        self.record_label_1 = QLabel('Provide the title of the task:')
-        self.record_label_2 = QLabel('Provide language (field) of the task:')
+        self.record_label_1 = QLabel('TITLE OF THE TASK:')
+        self.record_label_2 = QLabel('LANGUAGE (FIELD):')
+
+        self.record_label_1.setAlignment(Qt.AlignCenter)
 
         self.record_text_title = QLineEdit()
-        self.record_text_language = QLineEdit()
+        self.record_text_title.setAlignment(Qt.AlignHCenter)
+
 
 
 
@@ -179,10 +186,31 @@ class MainWindow(QMainWindow):
         self.record_button_start = QPushButton('Start')
 
 
+        #### ALIGNMENT, SHAPES AND FONT####
+
+        self.record_label_1.setFont(self.universal_font)
+        self.record_label_2.setFont(self.universal_font)
+
+        self.record_label_1.setAlignment(Qt.AlignCenter)
+        self.record_text_title.setMaximumWidth(250)
+        self.record_text_title.setMinimumWidth(350)
+
+        self.record_label_2.setAlignment(Qt.AlignCenter)
+        self.record_combo_box.setMaximumWidth(350)
+        self.record_combo_box.setMinimumWidth(200)
+
+        self.record_combo_box.setMinimumHeight(30)
+
+        self.record_button_cancel.setMinimumHeight(40)
+        self.record_button_start.setMinimumHeight(40)
+
+        #### GRIDS ####
+
+
         self.record_task_grid.addWidget(self.record_label_1)
-        self.record_task_grid.addWidget(self.record_text_title)
+        self.record_task_grid.addWidget(self.record_text_title, alignment=Qt.AlignHCenter)
         self.record_task_grid.addWidget(self.record_label_2)
-        self.record_task_grid.addWidget(self.record_combo_box)
+        self.record_task_grid.addWidget(self.record_combo_box, alignment=Qt.AlignCenter | Qt.AlignTop)
 
         self.record_task_grid_h.addWidget(self.record_button_cancel)
         self.record_task_grid_h.addWidget(self.record_button_start)
@@ -226,10 +254,22 @@ class MainWindow(QMainWindow):
         self.play_task_grid.addWidget(self.play_task_cancel_button)
 
 
+        #### ALIGNMENT, FONTS AND SHAPES ####
+
+        self.play_label_1.setFont(self.universal_font)
+
+        self.play_task_button.setMinimumHeight(40)
+
+        self.play_task_cancel_button.setMinimumHeight(40)
+
+
+        ####
 
         self.play_task_widget = QWidget()
 
         self.play_task_widget.setLayout(self.play_task_grid)
+
+
 
         #### BEHAVIOUR ####
 
@@ -243,7 +283,7 @@ class MainWindow(QMainWindow):
         #### WIDGETS ####
 
 
-        self.delete_task_label = QLabel('Provide number of the task to delete:')
+        self.delete_task_label = QLabel('PROVIDE TASK ID TO DELETE TASK:')
 
         self.delete_task_text_box = QLineEdit()
 
@@ -264,11 +304,26 @@ class MainWindow(QMainWindow):
         self.delete_task_grid_h.addWidget(self.delete_task_delete_button)
 
 
-        self.delete_task_grid.addWidget(self.delete_task_label)
+        self.delete_task_grid.addWidget(self.delete_task_label, alignment=Qt.AlignCenter )
 
-        self.delete_task_grid.addWidget(self.delete_task_text_box)
+        self.delete_task_grid.addWidget(self.delete_task_text_box, alignment=Qt.AlignTop | Qt.AlignCenter)
 
         self.delete_task_grid.addItem(self.delete_task_grid_h)
+
+
+        #### ALIGNMENT, FONT AND SHAPES ####
+
+        self.delete_task_text_box.setAlignment(Qt.AlignHCenter)
+
+        self.delete_task_label.setFont(self.universal_font)
+
+        self.delete_task_text_box.setMaximumWidth(200)
+
+        self.delete_task_cancel_button.setMinimumHeight(40)
+
+        self.delete_task_delete_button.setMinimumHeight(40)
+
+        #####
 
 
         self.delete_task_widget = QWidget()
@@ -309,6 +364,11 @@ class MainWindow(QMainWindow):
         self.about_widget.setLayout(self.about_grid_V)
 
 
+        self.about_label.setFont(self.universal_font)
+
+        self.about_label.setAlignment(Qt.AlignHCenter)
+
+
         #### BEHAVIOUR ####
 
         self.about_cancel_button.clicked.connect(self.cancel_record_task_method)
@@ -328,7 +388,12 @@ class MainWindow(QMainWindow):
 
     def delete_task(self):
 
-        task_id = int(self.delete_task_text_box.text())
+        try:
+            task_id = int(self.delete_task_text_box.text())
+
+        except:
+
+            task_id = self.delete_task_text_box.text()
 
         if self.delete_task_text_box.text() == "":
 
@@ -377,15 +442,37 @@ class MainWindow(QMainWindow):
         self.play_table.verticalHeader().hide()
         self.play_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.play_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.play_table.setColumnWidth(0, 280)
+        self.play_table.setColumnWidth(1, 180)
+        self.play_table.setColumnWidth(2, 110)
+        self.play_table.setColumnWidth(3, 110)
+
 
         for i, row in enumerate(rows):
 
-            self.play_table.setItem(i,0,QTableWidgetItem(row[0]))
-            self.play_table.setItem(i, 1, QTableWidgetItem(row[1]))
-            self.play_table.setItem(i, 2, QTableWidgetItem(row[2]))
-            self.play_table.setItem(i, 3, QTableWidgetItem(row[3]))
-            self.play_table.setItem(i, 4, QTableWidgetItem(str(row[4])))
-            self.play_table.setItem(i, 5, QTableWidgetItem(str(row[5])))
+            item = QTableWidgetItem(row[0])
+            item.setTextAlignment(Qt.AlignCenter)
+            self.play_table.setItem(i,0,item)
+
+            item = QTableWidgetItem(row[2])
+            item.setTextAlignment(Qt.AlignCenter)
+            self.play_table.setItem(i, 1, item)
+
+            item = QTableWidgetItem(row[2])
+            item.setTextAlignment(Qt.AlignCenter)
+            self.play_table.setItem(i, 2, item)
+
+            item = QTableWidgetItem(row[3])
+            item.setTextAlignment(Qt.AlignCenter)
+            self.play_table.setItem(i, 3, item)
+
+            item = QTableWidgetItem(str(row[4]))
+            item.setTextAlignment(Qt.AlignCenter)
+            self.play_table.setItem(i, 4, item)
+
+            item = QTableWidgetItem(str(row[5]))
+            item.setTextAlignment(Qt.AlignCenter)
+            self.play_table.setItem(i, 5, item)
 
 
 
@@ -445,7 +532,7 @@ class MainWindow(QMainWindow):
 
                 return
 
-            choice = QMessageBox.question(self, "Finish", 'Yes - Finish and save task to the database\nNo - Finish and don\'t save task\nCancel - back to the recording',
+            choice = QMessageBox.question(self, "Finish", '[Yes] - Finish and save task to the database\n[No] - Finish and don\'t save task\n[Cancel] - back to the recording',
                                  QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
 
 
@@ -477,7 +564,7 @@ class MainWindow(QMainWindow):
 
             #### PLAY TASK ####
 
-            choice = QMessageBox.question(self, "Task completed", 'Are you satisfied with the level of task accomplishment?',
+            choice = QMessageBox.question(self, "Task completed", 'Are you satisfied with the level of task accomplishment? If [Yes], it will be available in next interval of time.',
                                           QMessageBox.Yes | QMessageBox.No)
 
             if choice == QMessageBox.Yes:
@@ -682,6 +769,8 @@ class MainWindow(QMainWindow):
     def set_record_layout(self):
 
         self.step = 1
+        self.display_description.setReadOnly(False)
+        self.display_code.setReadOnly(False)
         self.display_description.setEnabled(True)
         self.display_code.setEnabled(True)
         self.display_title.setText(self.record_text_title.text().capitalize())
