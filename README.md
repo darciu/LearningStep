@@ -2,7 +2,7 @@
 
 ## Brief description
 
-LearingStep is an application for recording and playing text lessons (tasks). Main advantage is that lessons will be displayed in certain intervals of time eg. one day, three day, two weeks etc. It allows to remain old lessons as well as new ones.
+LearingStep is an application for recording and playing text lessons (tasks). Main advantage is that lessons will be displayed in certain intervals of time eg. one day, three day, two weeks etc after last pass. It allows to remain old lessons as well as new ones.
 
 ## Prerequisites
 This code was written in Python ver. 3.7.
