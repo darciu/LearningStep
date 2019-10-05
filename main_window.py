@@ -1,10 +1,14 @@
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QPushButton, QGroupBox, QTableWidget, QTableWidgetItem, QComboBox, QGridLayout,
-                             QVBoxLayout, QStackedLayout, QWidget, QTextEdit, QLineEdit, QLabel, QHBoxLayout, QMessageBox, QAbstractItemView)
+                             QVBoxLayout, QStackedLayout, QWidget, QTextEdit, QLineEdit, QLabel, QHBoxLayout, QMessageBox, QAbstractItemView,
+                             QFileDialog)
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIcon, QPixmap
 from database_class import Database
 import time
+import os
 from functools import partial
+import datetime
+import shutil
 import sys
 
 
@@ -27,6 +31,8 @@ class MainWindow(QMainWindow):
         self.description_dict = {}
 
         self.code_dict = {}
+
+        self.picture_dict = {}
 
         self.title = ""
 
@@ -96,9 +102,12 @@ class MainWindow(QMainWindow):
         self.display_code = QTextEdit()
         self.display_title = QLabel('Title')
         self.display_step = QLabel('Steps')
+        self.picture_button = QPushButton()
         self.finish_button = QPushButton('Finish')
         self.next_button = QPushButton('Next')
 
+        icon = QIcon('picture.png')
+        self.picture_button.setIcon(icon)
 
         ### GRIDS
 
@@ -108,8 +117,9 @@ class MainWindow(QMainWindow):
         ### ADD WIDGETS
 
         self.right_grid.addWidget(self.display_step,0,0)
-        self.right_grid.addWidget(self.finish_button, 1, 0)
-        self.right_grid.addWidget(self.next_button, 2, 0)
+        self.right_grid.addWidget(self.picture_button,1,0)
+        self.right_grid.addWidget(self.finish_button, 2, 0)
+        self.right_grid.addWidget(self.next_button, 3, 0)
 
 
         self.main_grid.addWidget(self.display_description,0,0)
@@ -148,6 +158,7 @@ class MainWindow(QMainWindow):
 
         self.finish_button.clicked.connect(self.finish_button_method)
         self.next_button.clicked.connect(self.next_button_method)
+        self.picture_button.clicked.connect(self.picture_button_method)
 
 
     def create_record_task_menu_layout(self):
@@ -171,6 +182,7 @@ class MainWindow(QMainWindow):
         self.record_combo_box.addItem("R")
         self.record_combo_box.addItem("Machine Learning")
         self.record_combo_box.addItem("Deep Learning")
+        self.record_combo_box.addItem("Statistics")
         self.record_combo_box.addItem("English")
 
 
@@ -521,6 +533,57 @@ class MainWindow(QMainWindow):
             item.setTextAlignment(Qt.AlignCenter)
             self.play_table.setItem(i, 5, item)
 
+    def picture_button_method(self):
+        """Picture button to load or display picture"""
+
+        if self.record_or_play:
+
+            #### RECORD TASK ####
+
+
+
+            path = QFileDialog.getOpenFileName(self, 'Load picture to database','c:\\',"Image files (*.jpg *.gif, *.png)")
+
+            # if path is empty
+            if path[0] == '':
+
+                return
+
+            try:
+
+                extension = path[0][-3:]
+
+                now = datetime.datetime.now()
+
+                filename_ext = "{0}.{1}".format(datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S"),extension)
+
+                shutil.copy(path[0],'pictures/{0}'.format(filename_ext))
+
+                self.picture_dict[self.step] = filename_ext
+
+
+            except:
+
+                QMessageBox.information(self, 'Error', 'Something went wrong during copying picture to the album. Please try once again.')
+
+
+        else:
+
+            #### PLAY TASK ####
+
+            if self.picture_dict[self.step] != "":
+
+
+                path = "pictures/{0}".format(self.picture_dict[self.step])
+
+                self.picture_window = ImageWindow(path)
+
+                self.picture_window.show()
+
+            else:
+
+                QMessageBox.information(self, 'Error', 'Application could not find attached picture. It might have been deleted or moved.')
+
 
     def finish_button_method(self):
         """Finish record and play button"""
@@ -551,7 +614,7 @@ class MainWindow(QMainWindow):
 
                     self.code_dict[self.step] = self.display_code.toPlainText()
 
-                self.db.add_task(self.description_dict,self.code_dict,self.title,self.language)
+                self.db.add_task(self.description_dict,self.code_dict,self.picture_dict, self.title,self.language)
 
                 self.set_welcome_layout()
 
@@ -623,6 +686,8 @@ class MainWindow(QMainWindow):
 
                 self.step += 1
 
+                self.picture_dict[self.step] = ""
+
                 self.display_step.setText("Step\n{0}".format(self.step))
 
                 self.display_description.clear()
@@ -636,7 +701,6 @@ class MainWindow(QMainWindow):
         else:
             #### PLAY ####
 
-            print(self.description_or_code)
 
             if self.description_or_code:
 
@@ -659,7 +723,7 @@ class MainWindow(QMainWindow):
         self.task_id = self.play_table.item(row,5).text()
 
 
-        self.title, self.description_dict, self.code_dict, self.pass_count = self.db.get_selected_task(self.task_id)
+        self.title, self.description_dict, self.code_dict, self.picture_dict, self.pass_count = self.db.get_selected_task(self.task_id)
 
         self.step = 1
 
@@ -715,6 +779,8 @@ class MainWindow(QMainWindow):
 
         self.display_step.setText('Step\n/')
 
+        self.picture_button.setDisabled(True)
+
         self.finish_button.setDisabled(True)
 
         self.next_button.setDisabled(True)
@@ -722,6 +788,8 @@ class MainWindow(QMainWindow):
         self.description_dict = {}
 
         self.code_dict = {}
+
+        self.picture_dict = {}
 
         self.title = ""
 
@@ -731,6 +799,8 @@ class MainWindow(QMainWindow):
         """Set layout while Record"""
 
         self.step = 1
+
+        self.picture_dict[1] = ""
 
         self.display_description.setReadOnly(False)
 
@@ -748,6 +818,8 @@ class MainWindow(QMainWindow):
 
         self.display_code.clear()
 
+        self.picture_button.setEnabled(True)
+
         self.finish_button.setEnabled(True)
 
         self.next_button.setEnabled(True)
@@ -763,15 +835,23 @@ class MainWindow(QMainWindow):
         """Set layout while play"""
 
         self.finish_button.setDisabled(True)
+
         self.next_button.setEnabled(False)
+
         QTimer.singleShot(3000, partial(self.next_button.setEnabled, True))
 
         self.display_description.setReadOnly(True)
+
         self.display_code.setReadOnly(True)
+
         self.display_description.setEnabled(True)
+
         self.display_code.setEnabled(True)
+
         self.display_title.setText(self.title)
+
         self.display_step.setText('Step\n1/{0}'.format(self.get_dict_highest_value()))
+
         self.display_description.setText(self.description_dict[self.step])
 
         self.description_or_code = True
@@ -780,9 +860,13 @@ class MainWindow(QMainWindow):
 
     def display_code_play_layout(self):
         """Displays code while Play"""
+
         self.description_or_code = False
 
+
         self.display_code.setText(self.code_dict[self.step])
+
+        self.picture_button.setEnabled(True)
 
         if self.step == int(self.get_dict_highest_value()):
 
@@ -791,14 +875,23 @@ class MainWindow(QMainWindow):
 
         else:
             self.next_button.setEnabled(False)
-            QTimer.singleShot(3000, partial(self.next_button.setEnabled, True))
+            QTimer.singleShot(1500, partial(self.next_button.setEnabled, True))
 
 
 
     def next_step_play_layout(self):
         """Click Next during Play"""
+
+
+
+
         self.step += 1
+
+
+
         self.description_or_code = True
+
+        self.picture_button.setEnabled(False)
 
         self.next_button.setEnabled(False)
         QTimer.singleShot(3000, partial(self.next_button.setEnabled, True))
@@ -851,7 +944,40 @@ class MainWindow(QMainWindow):
         sys.exit()
 
 
+
+
+class ImageWindow(QWidget):
+    """Pop up window with to display picture"""
+    def __init__(self, path):
+        super().__init__()
+
+        self.setWindowTitle('Picture')
+
+        self.setGeometry(500,100,500,500)
+
+        self.label = QLabel()
+
+        picture = QPixmap(path)
+
+        picture = picture.scaledToWidth(500)
+
+        self.label.setPixmap(picture)
+
+        self.layout = QVBoxLayout()
+
+        self.layout.addWidget(self.label)
+
+        self.setLayout(self.layout)
+
+
+
+
+
+
 if __name__ == '__main__':
+
+    if not os.path.exists('pictures'):
+        os.makedirs('pictures')
 
     app = QApplication([])
     window = MainWindow()

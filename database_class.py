@@ -17,6 +17,7 @@ class Database:
                             language text NOT NULL,
                             description text NOT NULL,
                             code text NOT NULL,
+                            picture text NOT NULL,
                             creation_date text NOT NULL,
                             last_pass_date text NOT NULL,
                             next_pass_date text NOT NULL,
@@ -54,16 +55,16 @@ class Database:
         cur.execute(sql,dataset)
         self.conn.commit()
 
-    def add_task(self,description_dict,code_dict,title, language):
+    def add_task(self,description_dict,code_dict,picture_dict,title, language):
         """Add new task to database"""
 
         creation_date = datetime.date.today()
 
         next_pass_date = creation_date + datetime.timedelta(days=1)
 
-        sql = "INSERT INTO tasks(title,language,description,code,creation_date,last_pass_date, next_pass_date,pass_count) VALUES (?,?,?,?,?,?,?,?)"
+        sql = "INSERT INTO tasks(title,language,description,code, picture, creation_date,last_pass_date, next_pass_date,pass_count) VALUES (?,?,?,?,?,?,?,?,?)"
 
-        dataset = (title,language,str(description_dict),str(code_dict),creation_date,"None",next_pass_date,0)
+        dataset = (title,language,str(description_dict),str(code_dict),str(picture_dict), creation_date,"None",next_pass_date,0)
 
         self.execute_sql(sql,dataset)
 
@@ -89,7 +90,7 @@ class Database:
     def get_selected_task(self, task_id):
         """Returns selected (in table) task"""
 
-        sql = "SELECT title, description, code, pass_count FROM tasks WHERE task_id = ?"
+        sql = "SELECT title, description, code, picture, pass_count FROM tasks WHERE task_id = ?"
 
         dataset = (int(task_id),)
 
@@ -99,7 +100,7 @@ class Database:
 
         row = cur.fetchone()
 
-        return row[0], eval(row[1]), eval(row[2]), row[3]
+        return row[0], eval(row[1]), eval(row[2]), eval(row[3]), row[4]
 
 
     def update_task(self, task_id, pass_count):
