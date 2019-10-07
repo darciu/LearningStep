@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
         self.finish_button = QPushButton('Finish')
         self.next_button = QPushButton('Next')
 
-        icon = QIcon('picture.png')
+        icon = QIcon('imgs/picture.png')
         self.picture_button.setIcon(icon)
 
         ### GRIDS
@@ -555,7 +555,7 @@ class MainWindow(QMainWindow):
 
                 now = datetime.datetime.now()
 
-                filename_ext = "{0}.{1}".format(datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S"),extension)
+                filename_ext = "{0}.{1}".format(self.display_title.text() + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S"),extension)
 
                 shutil.copy(path[0],'pictures/{0}'.format(filename_ext))
 
@@ -620,6 +620,8 @@ class MainWindow(QMainWindow):
 
             elif choice == QMessageBox.No:
 
+                self.remove_unfinished_recording_pictures()
+
                 self.set_welcome_layout()
 
             elif choice == QMessageBox.Cancel:
@@ -647,6 +649,8 @@ class MainWindow(QMainWindow):
             elif choice == QMessageBox.No:
 
                 QMessageBox.information(self, 'Task unaccomplished','Well... Try next time!')
+
+
 
                 self.set_welcome_layout()
 
@@ -757,6 +761,18 @@ class MainWindow(QMainWindow):
 
             self.stacked_layout.setCurrentIndex(0)
 
+    def remove_unfinished_recording_pictures(self):
+        """Removes all pictures that are linked with picture_dict paths"""
+
+        for pic_path in self.picture_dict.items():
+
+            if pic_path[1] != "":
+
+                try:
+                    os.remove("pictures/{0}".format(pic_path[1]))
+
+                except:
+                    pass
 
 
     def clear_record_menu(self):
@@ -866,7 +882,10 @@ class MainWindow(QMainWindow):
 
         self.display_code.setText(self.code_dict[self.step])
 
-        self.picture_button.setEnabled(True)
+
+        if self.picture_dict[self.step] != "":
+
+            self.picture_button.setEnabled(True)
 
         if self.step == int(self.get_dict_highest_value()):
 
@@ -968,6 +987,7 @@ class ImageWindow(QWidget):
         self.layout.addWidget(self.label)
 
         self.setLayout(self.layout)
+
 
 
 
