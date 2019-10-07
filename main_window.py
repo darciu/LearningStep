@@ -929,6 +929,10 @@ class MainWindow(QMainWindow):
 
         self.stacked_layout.setCurrentIndex(1)
 
+        self.display_description = ''
+
+        self.display_code = ''
+
 
 
     def menuPlay_method(self):
@@ -940,6 +944,10 @@ class MainWindow(QMainWindow):
         self.record_or_play = False
 
         self.stacked_layout.setCurrentIndex(2)
+
+        self.display_description = ''
+
+        self.display_code = ''
 
 
     def menuDelete_method(self):

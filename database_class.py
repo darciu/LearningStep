@@ -12,16 +12,16 @@ class Database:
         self.conn = self.create_connection('database.db')
 
         sql_create_tasks = """CREATE TABLE IF NOT EXISTS tasks(
-                            task_id integer PRIMARY KEY,
-                            title text NOT NULL,
-                            language text NOT NULL,
-                            description text NOT NULL,
-                            code text NOT NULL,
-                            picture text NOT NULL,
-                            creation_date text NOT NULL,
-                            last_pass_date text NOT NULL,
-                            next_pass_date text NOT NULL,
-                            pass_count integer NOT NULL
+                            task_id INTEGER PRIMARY KEY,
+                            title TEXT NOT NULL,
+                            language TEXT NOT NULL,
+                            description TEXT NOT NULL,
+                            code TEXT NOT NULL,
+                            picture TEXT NOT NULL,
+                            creation_date TEXT NOT NULL,
+                            last_pass_date TEXT NOT NULL,
+                            next_pass_date TEXT NOT NULL,
+                            pass_count INTEGER NOT NULL
                             );
                             """
         self.create_table(self.conn,sql_create_tasks)
