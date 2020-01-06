@@ -551,20 +551,22 @@ class MainWindow(QMainWindow):
 
             try:
 
-                extension = path[0][-3:]
+                extension = path[0][-3:].lower()
 
                 now = datetime.datetime.now()
 
-                filename_ext = "{0}.{1}".format(self.display_title.text() + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S"),extension)
+                image_name = self.title + "_STEP_" + str(self.step) + "_" + str(now.year) + "_" + str(now.month) + "_" + str(now.day)
 
-                shutil.copy(path[0],'pictures/{0}'.format(filename_ext))
+                filename_ext = "{0}.{1}".format(image_name,extension)
 
-                self.picture_dict[self.step] = filename_ext
+                shutil.copy(path[0],'temp_pic/{0}'.format(filename_ext))
+
+                self.picture_dict[self.step] = image_name
 
 
             except:
 
-                QMessageBox.information(self, 'Error', 'Something went wrong during copying picture to the album. Please try once again.')
+                QMessageBox.information(self, 'Error', 'Something has gone wrong during copying picture to the album. Please try once again.')
 
 
         else:
@@ -594,6 +596,8 @@ class MainWindow(QMainWindow):
 
             if self.step == 1 and self.display_description.text() == "" and self.display_code.toPlainText() == "":
 
+                self.remove_temp_pictures()
+
                 self.set_welcome_layout()
 
                 return
@@ -616,11 +620,15 @@ class MainWindow(QMainWindow):
 
                 self.db.add_task(self.description_dict,self.code_dict,self.picture_dict, self.title,self.language)
 
+                self.images_to_database()
+
+                self.remove_temp_pictures()
+
                 self.set_welcome_layout()
 
             elif choice == QMessageBox.No:
 
-                self.remove_unfinished_recording_pictures()
+                self.remove_temp_pictures()
 
                 self.set_welcome_layout()
 
@@ -761,18 +769,23 @@ class MainWindow(QMainWindow):
 
             self.stacked_layout.setCurrentIndex(0)
 
-    def remove_unfinished_recording_pictures(self):
-        """Removes all pictures that are linked with picture_dict paths"""
+    def remove_temp_pictures(self):
+        """Removes all pictures from temp_pic folder"""
 
-        for pic_path in self.picture_dict.items():
+        folder = 'temp_pic'
 
-            if pic_path[1] != "":
+        for filename in os.listdir(folder):
 
-                try:
-                    os.remove("pictures/{0}".format(pic_path[1]))
+            file_path = os.path.join(folder,filename)
 
-                except:
-                    pass
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+
+            except Exception as e:
+                print(e)
 
 
     def clear_record_menu(self):
@@ -920,18 +933,35 @@ class MainWindow(QMainWindow):
         self.display_step.setText('Step\n{0}/{1}'.format(str(self.step),self.get_dict_highest_value()))
 
 
+    def images_to_database(self):
+
+        for filename in os.listdir('temp_pic'):
+
+            if filename.endswith( ('.jpg','.png','.gif') ):
+
+                image_name = filename[:-4]
+
+                image_path = os.path.join('temp_pic',filename)
+
+                image_ext = filename[-3:]
+
+                self.db.insertBLOB(image_name, image_path, image_ext)
+
 
     def menuRecord_method(self):
         """Upper Menu option"""
+
+        self.remove_temp_pictures()
+
         self.clear_record_menu()
 
         self.record_or_play = True
 
         self.stacked_layout.setCurrentIndex(1)
 
-        self.display_description = ''
+        self.display_description.setText('')
 
-        self.display_code = ''
+        self.display_code.setText('')
 
 
 
@@ -945,9 +975,9 @@ class MainWindow(QMainWindow):
 
         self.stacked_layout.setCurrentIndex(2)
 
-        self.display_description = ''
+        self.display_description.setText('')
 
-        self.display_code = ''
+        self.display_code.setText('')
 
 
     def menuDelete_method(self):
@@ -1004,8 +1034,8 @@ class ImageWindow(QWidget):
 
 if __name__ == '__main__':
 
-    if not os.path.exists('pictures'):
-        os.makedirs('pictures')
+    if not os.path.exists('temp_pic'):
+        os.makedirs('temp_pic')
 
     app = QApplication([])
     window = MainWindow()

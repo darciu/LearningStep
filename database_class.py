@@ -24,7 +24,14 @@ class Database:
                             pass_count INTEGER NOT NULL
                             );
                             """
+        sql_create_images = """CREATE TABLE IF NOT EXISTS images(
+                            image_name TEXT NOT NULL,
+                            image_blob BLOB NOT NULL,
+                            image_ext TEXT NOT NULL);"""
+
         self.create_table(self.conn,sql_create_tasks)
+
+        self.create_table(self.conn, sql_create_images)
 
 
     def create_connection(self,db_file):
@@ -189,3 +196,35 @@ class Database:
         except:
 
             print('Error!')
+
+
+
+    ##### IMAGES #########
+
+    def convertToBinaryData(self, filename):
+
+        with open(filename, 'rb') as file:
+            blobData = file.read()
+        return blobData
+
+    def insertBLOB(self,image_name, image_path, image_ext):
+        """Insert image as BLOB to the database"""
+        try:
+
+
+
+            sql = """ INSERT INTO images (image_name, image_blob, image_ext) VALUES (?, ?, ?)"""
+
+            image_blob = self.convertToBinaryData(image_path)
+
+            # Convert data into tuple format
+
+            dataset = (image_name, image_blob, image_ext)
+
+            self.execute_sql(sql, dataset)
+
+
+        except sqlite3.Error as error:
+
+            print("Failed to insert blob data into sqlite table", error)
+
