@@ -40,13 +40,14 @@ class MainWindow(QMainWindow):
 
         self.record_or_play = True
 
-        self.about_dict = {1:'LearningStep\n\nThis application is named LearningStep. The purpose is to learn self made text-lessons in intervals of time.',
+        self.about_dict = {1:'LearningStep\n\nThis application is named LearningStep. The purpose is to learn and repeat self made text-lessons in intervals of time.',
                            2:'Record New Task\n\nConstruct your own lesson in steps.\nProvide title as short description, choose language (field of interests) and by clicking next move forward lessons.'
-                             '\nOne step consists of description (upper text field) and code (lower text field).\nTo proceed, click Next button.\nWhen all steps are written, click Finish button to save the lesson.',
+                             '\nOne step consists of description (upper text field) and code (lower text field).\nYou can also attach an image to every step.'
+                             '\nTo proceed next step, click Next button.\nWhen all steps are written, click Finish button to save the lesson.',
                            3:'Play The Task\n\nPlay previously recorded task (choose from the table of available tasks).\nGo through all tasks by clicking Next button.\nAt first you see description and then code field.\n'
                              'When you will walk through all steps you can decide whether this approach was satisfying. Only if so, task will be completed,\n updated to database '
                              'and reminded after certain interval of time.',
-                           4:'Delete Task\n\nDelete task according to provided task ID.',
+                           4:'Delete Task\n\nDelete task according to provided task ID.\nBe aware that images stored in database will also be deleted.',
                            5:'Time intervals are:\n\n1 day, 3 days, 7 days, 10 days, 14 days, 28 days, 60 days, 90 days, 180 days...',
                            6:'Credits:\n\nDariusz Giemza, 2019',
                            7:''}
@@ -461,16 +462,19 @@ class MainWindow(QMainWindow):
 
             return
 
-        choice = QMessageBox.question(self, "Delete task", 'Are you sure to delete task with given ID: {0}'.format(task_id),
+        choice = QMessageBox.question(self, "Delete task", 'Are you sure to delete task and all dependend images?\nYou will not be able to restore deleted data. Task ID: {0}'.format(task_id),
                                       QMessageBox.Yes | QMessageBox.No)
 
 
         if choice == QMessageBox.Yes:
 
+            self.title, self.description_dict, self.code_dict, self.picture_dict, self.pass_count = self.db.get_selected_task(task_id)
+
+            self.db.delete_images(self.picture_dict)
+
             self.db.delete_task(task_id)
 
             QMessageBox.information(self, 'Task deleted', 'Task with ID {0} has been successfully deleted from database!'.format(task_id))
-
 
             self.stacked_layout.setCurrentIndex(0)
 
@@ -490,7 +494,7 @@ class MainWindow(QMainWindow):
 
         self.play_table.setColumnCount(6)
 
-        self.play_table.setHorizontalHeaderLabels(['Task title (short description)', 'Language', 'Creation Date', 'Last Pass Date', 'Pass Count', 'ID'])
+        self.play_table.setHorizontalHeaderLabels(['Task title (short description)', 'Language (Field)', 'Creation Date', 'Last Pass Date', 'Pass Count', 'ID'])
 
         self.play_table.verticalHeader().hide()
 
@@ -513,7 +517,7 @@ class MainWindow(QMainWindow):
             item.setTextAlignment(Qt.AlignCenter)
             self.play_table.setItem(i,0,item)
 
-            item = QTableWidgetItem(row[2])
+            item = QTableWidgetItem(row[1])
             item.setTextAlignment(Qt.AlignCenter)
             self.play_table.setItem(i, 1, item)
 
@@ -576,11 +580,13 @@ class MainWindow(QMainWindow):
             if self.picture_dict[self.step] != "":
 
 
-                path = "pictures/{0}".format(self.picture_dict[self.step])
+                image_path = self.db.readBlobData(self.picture_dict[self.step])
 
-                self.picture_window = ImageWindow(path)
+                self.picture_window = ImageWindow(image_path)
 
                 self.picture_window.show()
+
+                self.remove_temp_pictures()
 
             else:
 
@@ -839,7 +845,7 @@ class MainWindow(QMainWindow):
 
         self.display_code.setEnabled(True)
 
-        self.display_title.setText(self.record_text_title.text().capitalize())
+        self.display_title.setText(self.record_text_title.text())
 
         self.display_step.setText('Step\n{0}'.format(self.step))
 
@@ -884,6 +890,8 @@ class MainWindow(QMainWindow):
         self.display_description.setText(self.description_dict[self.step])
 
         self.description_or_code = True
+
+        self.remove_temp_pictures()
 
 
 

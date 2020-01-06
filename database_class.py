@@ -1,7 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 import datetime
-
+import os
 
 class Database:
     """Class responsible for database connection"""
@@ -202,16 +202,17 @@ class Database:
     ##### IMAGES #########
 
     def convertToBinaryData(self, filename):
+        """Converts image to binary form"""
 
         with open(filename, 'rb') as file:
+
             blobData = file.read()
         return blobData
 
     def insertBLOB(self,image_name, image_path, image_ext):
         """Insert image as BLOB to the database"""
+
         try:
-
-
 
             sql = """ INSERT INTO images (image_name, image_blob, image_ext) VALUES (?, ?, ?)"""
 
@@ -228,3 +229,57 @@ class Database:
 
             print("Failed to insert blob data into sqlite table", error)
 
+    def writeTofile(self, image_blob, image_path):
+        """Convert blob image to file form"""
+        with open(image_path, 'wb') as file:
+
+            file.write(image_blob)
+
+
+
+    def readBlobData(self, image_name):
+        """Open blob image from the database"""
+
+        try:
+
+            cur = self.conn.cursor()
+
+            sql = """SELECT * from images where image_name = ?"""
+            dataset = (image_name,)
+
+            cur.execute(sql, dataset)
+
+            row = cur.fetchone()
+
+            image_path = os.path.join('temp_pic',row[0]) + "." + row[2]
+
+            image_blob = row[1]
+
+            self.writeTofile(image_blob, image_path)
+
+            return image_path
+
+
+        except sqlite3.Error as error:
+            print("Failed to read blob data from sqlite table", error)
+
+
+    def delete_images(self, picture_dict):
+        """Deletes images from the database according to given picture dictionary"""
+
+        for image in picture_dict.items():
+            image_name = image[1]
+
+            if image_name != "":
+
+                sql = "DELETE FROM images WHERE image_name = ?"
+
+                dataset = (image_name,)
+
+                try:
+
+                    self.execute_sql(sql, dataset)
+
+                except:
+
+                    print('Error!')
