@@ -5,7 +5,7 @@
 LearningStep is an application for recording and playing text lessons (tasks). Main advantage is that lessons will be displayed in certain intervals of time eg. one day, three day, two weeks etc. after last pass. This is helpful to remind old, not used frequently information.
 
 Moreover it is possible to attach a picture for every step of the lesson. Use this functionality to keep complicated formulas, drawings, charts...
-Pictures will be stored in 'pictures' folder so do not delete or move them manually.
+Pictures are stored in the database.
 
 ## Prerequisites
 This code was written in Python ver. 3.7.

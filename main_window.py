@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
 
         self.language = ""
 
-        self.record_or_play = True
+        self.record_or_play = True # record is True, play is False
 
         self.about_dict = {1:'LearningStep\n\nThis application is named LearningStep. The purpose is to learn and repeat self made text-lessons in intervals of time.',
                            2:'Record New Task\n\nConstruct your own lesson in steps.\nProvide title as short description, choose language (field of interests) and by clicking next move forward lessons.'
@@ -107,6 +107,25 @@ class MainWindow(QMainWindow):
         self.finish_button = QPushButton('Finish')
         self.next_button = QPushButton('Next')
 
+        self.alpha_button = QPushButton('α')
+        self.beta_button = QPushButton('β')
+        self.pi_button = QPushButton('π')
+        self.omega_button = QPushButton('Ω')
+        self.lambda_button = QPushButton('λ')
+        self.mi_button = QPushButton('µ')
+        self.sigma_button = QPushButton('σ')
+        self.sum_button = QPushButton('Σ')
+        self.delta_button = QPushButton('Δ')
+        self.gamma_button = QPushButton('Γ')
+        self.not_equal_button = QPushButton('≠')
+        self.approx_equal_button = QPushButton('≈')
+        self.sqrt_button = QPushButton('√')
+        self.gt_button = QPushButton('≥')
+        self.lt_button = QPushButton('≤')
+        self.degree_button = QPushButton('°')
+
+
+
         icon = QIcon('imgs/picture.png')
         self.picture_button.setIcon(icon)
 
@@ -114,8 +133,27 @@ class MainWindow(QMainWindow):
 
         self.main_grid = QGridLayout()
         self.right_grid = QGridLayout()
+        self.symbols_grid = QGridLayout()
 
         ### ADD WIDGETS
+
+        self.symbols_grid.addWidget(self.alpha_button,0,0)
+        self.symbols_grid.addWidget(self.beta_button,0,1)
+        self.symbols_grid.addWidget(self.pi_button, 0, 2)
+        self.symbols_grid.addWidget(self.omega_button, 0, 3)
+        self.symbols_grid.addWidget(self.lambda_button, 0, 4)
+        self.symbols_grid.addWidget(self.mi_button, 0, 5)
+        self.symbols_grid.addWidget(self.sigma_button, 0, 6)
+        self.symbols_grid.addWidget(self.sum_button, 0, 7)
+        self.symbols_grid.addWidget(self.delta_button,1,0)
+        self.symbols_grid.addWidget(self.gamma_button,1,1)
+        self.symbols_grid.addWidget(self.not_equal_button,1,2)
+        self.symbols_grid.addWidget(self.approx_equal_button, 1, 3)
+        self.symbols_grid.addWidget(self.sqrt_button, 1, 4)
+        self.symbols_grid.addWidget(self.gt_button,1,5)
+        self.symbols_grid.addWidget(self.lt_button,1,6)
+        self.symbols_grid.addWidget(self.degree_button,1,7)
+
 
         self.right_grid.addWidget(self.display_step,0,0)
         self.right_grid.addWidget(self.picture_button,1,0)
@@ -123,6 +161,8 @@ class MainWindow(QMainWindow):
         self.right_grid.addWidget(self.next_button, 3, 0)
 
 
+
+        self.main_grid.addItem(self.symbols_grid,2,0)
         self.main_grid.addWidget(self.display_description,0,0)
         self.main_grid.addWidget(self.display_code,1,0)
         self.main_grid.addWidget(self.display_title,0,1)
@@ -160,6 +200,125 @@ class MainWindow(QMainWindow):
         self.finish_button.clicked.connect(self.finish_button_method)
         self.next_button.clicked.connect(self.next_button_method)
         self.picture_button.clicked.connect(self.picture_button_method)
+
+        self.alpha_button.clicked.connect(self.alpha_button_method)
+        self.beta_button.clicked.connect(self.beta_button_method)
+        self.pi_button.clicked.connect(self.pi_button_method)
+        self.omega_button.clicked.connect(self.omega_button_method)
+        self.lambda_button.clicked.connect(self.lambda_button_method)
+        self.mi_button.clicked.connect(self.mi_button_method)
+        self.sigma_button.clicked.connect(self.sigma_button_method)
+        self.sum_button.clicked.connect(self.sum_button_method)
+        self.delta_button.clicked.connect(self.delta_button_method)
+        self.gamma_button.clicked.connect(self.gamma_button_method)
+        self.not_equal_button.clicked.connect(self.not_equal_button_method)
+        self.approx_equal_button.clicked.connect(self.approx_equal_button_method)
+        self.sqrt_button.clicked.connect(self.sqrt_button_method)
+        self.gt_button.clicked.connect(self.gt_button_method)
+        self.lt_button.clicked.connect(self.lt_button_method)
+        self.degree_button.clicked.connect(self.degree_button_method)
+
+
+
+    #### SPECIAL SYMBOLS METHODS ####
+
+    def alpha_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + 'α')
+
+
+    def beta_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + 'β')
+
+
+    def pi_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + 'π')
+
+
+    def omega_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + 'Ω')
+
+
+    def lambda_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + 'λ')
+
+
+    def mi_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + 'µ')
+
+
+    def sigma_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + 'σ')
+
+
+    def sum_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + 'Σ')
+
+
+    def delta_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + 'Δ')
+
+
+
+    def gamma_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + 'Γ')
+
+
+    def not_equal_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + '≠')
+
+
+    def approx_equal_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + '≈')
+
+
+    def sqrt_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + '√')
+
+
+    def gt_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + '≥')
+
+
+    def lt_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + '≤')
+
+
+    def degree_button_method(self):
+
+        text = self.display_code.toPlainText()
+        self.display_code.setText(text + '°')
+
+
 
 
     def create_record_task_menu_layout(self):
@@ -233,6 +392,7 @@ class MainWindow(QMainWindow):
 
     def create_play_task_menu_layout(self):
         """Create play task layout"""
+
         #### WIDGETS ####
 
         self.play_label_1 = QLabel('CHOOSE ONE OF AVAILABLE TASKS:')
@@ -820,6 +980,26 @@ class MainWindow(QMainWindow):
 
         self.next_button.setDisabled(True)
 
+        self.alpha_button.setDisabled(True)
+        self.beta_button.setDisabled(True)
+        self.pi_button.setDisabled(True)
+        self.omega_button.setDisabled(True)
+        self.lambda_button.setDisabled(True)
+        self.mi_button.setDisabled(True)
+        self.sigma_button.setDisabled(True)
+        self.sum_button.setDisabled(True)
+        self.delta_button.setDisabled(True)
+        self.gamma_button.setDisabled(True)
+        self.not_equal_button.setDisabled(True)
+        self.approx_equal_button.setDisabled(True)
+        self.sqrt_button.setDisabled(True)
+        self.gt_button.setDisabled(True)
+        self.lt_button.setDisabled(True)
+        self.degree_button.setDisabled(True)
+
+
+
+
         self.description_dict = {}
 
         self.code_dict = {}
@@ -859,6 +1039,25 @@ class MainWindow(QMainWindow):
 
         self.next_button.setEnabled(True)
 
+        self.alpha_button.setDisabled(False)
+        self.beta_button.setDisabled(False)
+        self.pi_button.setDisabled(False)
+        self.omega_button.setDisabled(False)
+        self.lambda_button.setDisabled(False)
+        self.mi_button.setDisabled(False)
+        self.sigma_button.setDisabled(False)
+        self.sum_button.setDisabled(False)
+        self.delta_button.setDisabled(False)
+        self.gamma_button.setDisabled(False)
+        self.not_equal_button.setDisabled(False)
+        self.approx_equal_button.setDisabled(False)
+        self.sqrt_button.setDisabled(False)
+        self.gt_button.setDisabled(False)
+        self.lt_button.setDisabled(False)
+        self.degree_button.setDisabled(False)
+
+
+
     def get_dict_highest_value(self):
         """Get highest value of step from dictionary"""
 
@@ -872,6 +1071,24 @@ class MainWindow(QMainWindow):
         self.finish_button.setDisabled(True)
 
         self.next_button.setEnabled(False)
+
+        self.alpha_button.setDisabled(True)
+        self.beta_button.setDisabled(True)
+        self.pi_button.setDisabled(True)
+        self.omega_button.setDisabled(True)
+        self.lambda_button.setDisabled(True)
+        self.mi_button.setDisabled(True)
+        self.sigma_button.setDisabled(True)
+        self.sum_button.setDisabled(True)
+        self.delta_button.setDisabled(True)
+        self.gamma_button.setDisabled(True)
+        self.not_equal_button.setDisabled(True)
+        self.approx_equal_button.setDisabled(True)
+        self.sqrt_button.setDisabled(True)
+        self.gt_button.setDisabled(True)
+        self.lt_button.setDisabled(True)
+        self.degree_button.setDisabled(True)
+
 
         QTimer.singleShot(3000, partial(self.next_button.setEnabled, True))
 
