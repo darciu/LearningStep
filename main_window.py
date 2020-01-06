@@ -126,8 +126,10 @@ class MainWindow(QMainWindow):
 
 
 
-        icon = QIcon('imgs/picture.png')
-        self.picture_button.setIcon(icon)
+
+        self.icon_black = QIcon(os.path.join('imgs','picture.png'))
+        self.icon_red = QIcon(os.path.join('imgs','picture_red.png'))
+        self.picture_button.setIcon(self.icon_black)
 
         ### GRIDS
 
@@ -723,9 +725,13 @@ class MainWindow(QMainWindow):
 
                 filename_ext = "{0}.{1}".format(image_name,extension)
 
-                shutil.copy(path[0],'temp_pic/{0}'.format(filename_ext))
+                shutil.copy(path[0], os.path.join('temp_pic',filename_ext))
 
                 self.picture_dict[self.step] = image_name
+
+
+                self.picture_button.setIcon(self.icon_red)
+
 
 
             except:
@@ -872,6 +878,8 @@ class MainWindow(QMainWindow):
 
                 self.display_code.clear()
 
+                self.picture_button.setIcon(self.icon_black)
+
             else:
 
                 return
@@ -1010,6 +1018,8 @@ class MainWindow(QMainWindow):
 
         self.language = ""
 
+        self.picture_button.setIcon(self.icon_black)
+
     def set_record_layout(self):
         """Set layout while Record"""
 
@@ -1124,6 +1134,12 @@ class MainWindow(QMainWindow):
         if self.picture_dict[self.step] != "":
 
             self.picture_button.setEnabled(True)
+
+            self.picture_button.setIcon(self.icon_red)
+
+        else:
+
+            self.picture_button.setIcon(self.icon_black)
 
         if self.step == int(self.get_dict_highest_value()):
 
